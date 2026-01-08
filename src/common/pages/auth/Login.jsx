@@ -7,9 +7,6 @@ import { AuthContext } from "../../context/Authprovider";
 import API from "../../../../api/Api";
 import { toast } from "react-toastify";
 
-// Firebase Imports
-import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
-import { auth } from "../../../firebaseConfig";// Ensure this path is correct based on your folder structure
 
 // --- Visual Components ---
 const GrainOverlay = () => (

@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { auth } from "../../../firebaseConfig";
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
