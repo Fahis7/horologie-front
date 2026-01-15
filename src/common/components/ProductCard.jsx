@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Heart, ShoppingBag, ChevronRight } from "lucide-react";
+import { Heart, ChevronRight } from "lucide-react";
 import { AuthContext } from "../context/Authprovider";
 import API from "../../../api/Api";
 import toast from "react-hot-toast";
@@ -80,7 +80,7 @@ const ProductCard = ({ product }) => {
             </div>
           )}
 
-          {/* Actions Overlay */}
+          {/* Actions Overlay (Wishlist Only) */}
           <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
             <button
               onClick={handleWishList}
@@ -103,7 +103,7 @@ const ProductCard = ({ product }) => {
             </button>
           </div>
 
-          {/* Product Image Container - Fixed Aspect Ratio */}
+          {/* Product Image Container */}
           <div className="relative w-full pb-[130.33%] bg-gray-100 overflow-hidden">
             {/* Loader */}
             <div className="absolute inset-0 flex items-center justify-center">
@@ -126,25 +126,6 @@ const ProductCard = ({ product }) => {
 
             {/* Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
-            {/* Quick Add to Cart */}
-            <button
-              className={`absolute bottom-0 left-0 right-0 bg-black text-white py-3.5 text-sm font-medium tracking-widest uppercase transform transition-all duration-300 ${
-                isHovered
-                  ? "translate-y-0 opacity-100"
-                  : "translate-y-full opacity-0"
-              }`}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                toast.success("Added to cart");
-              }}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <ShoppingBag className="w-4 h-4" />
-                <span>Add to Cart</span>
-              </div>
-            </button>
           </div>
 
           {/* Product Info */}

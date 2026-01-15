@@ -12,7 +12,8 @@ import {
   ChevronLeft, 
   ShieldCheck, 
   Truck,
-  Link as LinkIcon
+  Link as LinkIcon,
+  X
 } from "lucide-react";
 
 // --- HELPERS ---
@@ -25,7 +26,22 @@ const GrainOverlay = () => (
   />
 );
 
-// Custom Swiss Shield Icon matching Lucide style
+// Helper: Determine if URL is YouTube or Raw File
+const getVideoType = (url) => {
+  if (!url) return null;
+  if (url.includes("youtube.com") || url.includes("youtu.be")) return "youtube";
+  return "video"; // Matches raw file (Cloudinary)
+};
+
+// Helper: Convert YouTube watch URL to Embed URL
+const getYouTubeEmbed = (url) => {
+  if (!url) return "";
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? `https://www.youtube.com/embed/${match[2]}?autoplay=1` : url;
+};
+
+// Custom Swiss Shield Icon
 const SwissShieldIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
@@ -40,7 +56,8 @@ const ProductDetails = () => {
   const { user, setUser } = useContext(AuthContext);
 
   const [product, setProduct] = useState(null);
-  const [fullscreenMedia, setFullscreenMedia] = useState(null);
+  const [fullscreenMedia, setFullscreenMedia] = useState(null); 
+  const [mediaType, setMediaType] = useState("image"); 
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [isWished, setIsWished] = useState(false);
@@ -52,7 +69,7 @@ const ProductDetails = () => {
       try {
         const res = await API.get(`/products/${id}/`);
         setProduct(res.data);
-        setActiveImage(res.data.image);
+        setActiveImage(res.data.image); 
       } catch (error) {
         console.error("Failed to load product:", error);
         toast.error("Failed to load product");
@@ -120,7 +137,7 @@ const ProductDetails = () => {
     }
   };
 
-  // 🔗 SHARE FUNCTIONALITY
+  // 🔗 Share Functionality
   const handleShare = async () => {
     const shareData = {
       title: product.name,
@@ -140,6 +157,12 @@ const ProductDetails = () => {
     }
   };
 
+  // Open Media (Image or Video)
+  const openFullscreen = (url, type = "image") => {
+    setFullscreenMedia(url);
+    setMediaType(type);
+  };
+
   if (loading) return <div className="h-screen bg-white flex items-center justify-center"><div className="w-12 h-12 border-2 border-gray-200 border-t-black rounded-full animate-spin"></div></div>;
   if (!product) return null;
 
@@ -156,13 +179,16 @@ const ProductDetails = () => {
       <div className="max-w-[90rem] mx-auto px-6 md:px-12 py-32 md:py-40">
         <div className="flex flex-col lg:flex-row gap-16 lg:gap-24">
           
-          {/* LEFT: GALLERY */}
+          {/* ================= LEFT: GALLERY ================= */}
           <div className="w-full lg:w-3/5 space-y-8">
+            
+            {/* Main Active Image Display */}
             <motion.div 
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
+              key={activeImage} 
               className="relative w-full aspect-[4/5] md:aspect-square lg:aspect-[4/3] bg-gray-50 rounded-sm overflow-hidden border border-gray-100 cursor-zoom-in group"
-              onClick={() => setFullscreenMedia(activeImage)}
+              onClick={() => openFullscreen(activeImage, "image")}
             >
               <img
                 src={activeImage}
@@ -171,46 +197,68 @@ const ProductDetails = () => {
               />
             </motion.div>
 
-            <div className="grid grid-cols-4 gap-4">
+            {/* Thumbnail Grid */}
+            <div className="grid grid-cols-5 gap-4">
+              {/* 1. Main Product Image Thumbnail */}
               <button 
                 onClick={() => setActiveImage(product.image)}
                 className={`aspect-square bg-gray-50 border transition-all p-2 rounded-sm ${activeImage === product.image ? 'border-black ring-1 ring-black' : 'border-gray-200 hover:border-gray-400'}`}
               >
-                <img src={product.image} className="w-full h-full object-contain" />
+                <img src={product.image} className="w-full h-full object-contain" alt="main" />
               </button>
-              {product.gallery?.slice(0, 2).map((img, idx) => (
+
+              {/* 2. Gallery Images Thumbnails */}
+              {product.gallery?.map((item) => (
                 <button
-                  key={idx}
-                  onClick={() => setActiveImage(img)}
-                  className={`aspect-square bg-gray-50 border transition-all p-2 rounded-sm ${activeImage === img ? 'border-black ring-1 ring-black' : 'border-gray-200 hover:border-gray-400'}`}
+                  key={item.id}
+                  onClick={() => setActiveImage(item.image)} 
+                  className={`aspect-square bg-gray-50 border transition-all p-2 rounded-sm ${activeImage === item.image ? 'border-black ring-1 ring-black' : 'border-gray-200 hover:border-gray-400'}`}
                 >
-                  <img src={img} className="w-full h-full object-contain" />
+                  <img src={item.image} className="w-full h-full object-contain" alt="gallery" />
                 </button>
               ))}
+
+              {/* 3. ✅ VIDEO THUMBNAIL (With Preview) */}
               {product.video && (
                 <button
-                  onClick={() => setFullscreenMedia(product.video)}
-                  className="aspect-square bg-gray-50 border border-gray-200 hover:border-black transition-all relative group overflow-hidden rounded-sm"
+                  onClick={() => openFullscreen(product.video, getVideoType(product.video))}
+                  className="aspect-square bg-gray-100 border border-gray-200 hover:border-black transition-all relative group overflow-hidden rounded-sm flex items-center justify-center"
                 >
-                  <video src={product.video} className="w-full h-full object-cover opacity-80" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center">
-                      <Play size={10} className="fill-black text-black ml-0.5" />
-                    </div>
+                  {/* The Video Preview Layer */}
+                  {getVideoType(product.video) === "youtube" ? (
+                     <div className="w-full h-full bg-black flex items-center justify-center opacity-80">
+                        <span className="text-[8px] text-white uppercase tracking-widest">YouTube</span>
+                     </div>
+                  ) : (
+                    // Muted Autoplaying Video for Preview
+                    <video 
+                      src={product.video} 
+                      className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity"
+                      muted 
+                      loop 
+                      playsInline
+                      onMouseOver={event => event.target.play()} 
+                      onMouseOut={event => event.target.pause()} 
+                    />
+                  )}
+
+                  {/* Play Icon Overlay */}
+                  <div className="w-8 h-8 rounded-full bg-white/90 shadow-lg flex items-center justify-center z-10 backdrop-blur-sm pointer-events-none">
+                    <Play size={10} className="fill-black text-black ml-0.5" />
                   </div>
                 </button>
               )}
             </div>
           </div>
 
-          {/* RIGHT: DETAILS */}
+          {/* ================= RIGHT: DETAILS ================= */}
           <div className="w-full lg:w-2/5 relative">
             <div className="lg:sticky lg:top-32 space-y-10">
               
               <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-gray-500 text-xs font-bold tracking-[0.2em] uppercase">
-                    {product.brand || "Horologie"}
+                    {product.category || "Horologie"}
                   </span>
                   <span className={`text-[10px] uppercase tracking-widest font-bold ${product.stock > 0 ? "text-green-600" : "text-red-500"}`}>
                     {product.stock > 0 ? "Available" : "Sold Out"}
@@ -272,21 +320,18 @@ const ProductDetails = () => {
                 <h3 className="text-xs text-black uppercase tracking-widest mb-6 border-b border-gray-100 pb-2 font-bold">Specifications</h3>
                 <div className="grid grid-cols-2 gap-y-4 gap-x-8 text-xs">
                     <div><span className="text-gray-400 block mb-1">Movement</span><span className="text-gray-900 font-medium">Automatic</span></div>
-                    <div><span className="text-gray-400 block mb-1">Material</span><span className="text-gray-900 font-medium">Oystersteel</span></div>
-                    <div><span className="text-gray-400 block mb-1">Dial</span><span className="text-gray-900 font-medium">{product.color || "Standard"}</span></div>
-                    <div><span className="text-gray-400 block mb-1">Resistance</span><span className="text-gray-900 font-medium">100m / 330ft</span></div>
+                    <div><span className="text-gray-400 block mb-1">Material</span><span className="text-gray-900 font-medium">Stainless Steel</span></div>
+                    <div><span className="text-gray-400 block mb-1">Category</span><span className="text-gray-900 font-medium capitalize">{product.category}</span></div>
+                    <div><span className="text-gray-400 block mb-1">Warranty</span><span className="text-gray-900 font-medium">5 Years</span></div>
                 </div>
               </div>
 
-              {/* ✅ UPDATED TRUST INDICATORS WITH SWISS BADGE */}
               <div className="flex flex-wrap items-center gap-x-6 gap-y-3 pt-6 text-[10px] text-gray-400 uppercase tracking-widest">
                 <div className="flex items-center gap-2"><ShieldCheck size={14} className="text-yellow-700" /> 5-Year Warranty</div>
                 <div className="flex items-center gap-2 font-bold text-gray-600">
                     <SwissShieldIcon className="text-yellow-700" /> Swiss Made mark.
                 </div>
                 <div className="flex items-center gap-2"><Truck size={14} className="text-yellow-700" /> Free Shipping</div>
-                {/* New Swiss Made Badge */}
-                
               </div>
 
             </div>
@@ -294,19 +339,35 @@ const ProductDetails = () => {
         </div>
       </div>
 
+      {/* ================= FULLSCREEN OVERLAY ================= */}
       <AnimatePresence>
         {fullscreenMedia && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            onClick={() => setFullscreenMedia(null)}
-            className="fixed inset-0 bg-white/95 backdrop-blur-xl z-[60] flex items-center justify-center cursor-zoom-out p-4 md:p-12"
+            className="fixed inset-0 bg-white/95 backdrop-blur-xl z-[60] flex items-center justify-center p-4 md:p-12"
           >
-            {fullscreenMedia.endsWith(".mp4") ? (
-              <video src={fullscreenMedia} autoPlay controls className="max-w-full max-h-full shadow-2xl" />
-            ) : (
-              <img src={fullscreenMedia} alt="Full View" className="max-w-full max-h-full object-contain shadow-2xl" />
-            )}
-            <button className="absolute top-6 right-6 text-gray-400 hover:text-black font-light text-sm tracking-widest">CLOSE</button>
+            <button 
+              onClick={() => setFullscreenMedia(null)}
+              className="absolute top-6 right-6 text-gray-400 hover:text-black transition-colors"
+            >
+              <X size={32} />
+            </button>
+
+            <div className="w-full max-w-5xl h-full flex items-center justify-center">
+              {mediaType === "youtube" ? (
+                <iframe
+                  src={getYouTubeEmbed(fullscreenMedia)}
+                  title="Video player"
+                  allow="autoplay; encrypted-media"
+                  allowFullScreen
+                  className="w-full aspect-video shadow-2xl"
+                />
+              ) : mediaType === "video" ? ( 
+                <video src={fullscreenMedia} autoPlay controls className="max-w-full max-h-full shadow-2xl" />
+              ) : ( 
+                <img src={fullscreenMedia} alt="Full View" className="max-w-full max-h-full object-contain shadow-2xl" />
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

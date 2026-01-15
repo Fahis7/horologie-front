@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, EyeOff, Lock, Mail, Phone, Smartphone } from "lucide-react";
@@ -7,6 +7,9 @@ import { AuthContext } from "../../context/Authprovider";
 import API from "../../../../api/Api";
 import { toast } from "react-toastify";
 
+// Firebase Imports
+import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
+import { auth } from "../../../firebaseConfig"; 
 
 // --- Visual Components ---
 const GrainOverlay = () => (
@@ -43,6 +46,20 @@ export default function Login() {
   const [otp, setOtp] = useState("");
   const [confirmationResult, setConfirmationResult] = useState(null);
 
+  // Use a Ref to track if recaptcha is already rendered to avoid duplicate widgets
+  const recaptchaVerifierRef = useRef(null);
+
+  // --- Helper Function for Redirection ---
+  const handleRedirect = (userData) => {
+    if (userData.is_staff || userData.is_superuser) {
+      toast.info("Admin Access Granted");
+      navigate("/admin");
+    } else {
+      toast.success("Welcome back.");
+      navigate("/");
+    }
+  };
+
   // --- Handlers ---
 
   const handleChange = (e) => {
@@ -57,8 +74,10 @@ export default function Login() {
     try {
       const res = await API.post("/auth/login/", formData);
       login(res.data);
-      toast.success("Welcome back.");
-      navigate("/");
+      
+      // ✅ Role Check
+      handleRedirect(res.data.user);
+
     } catch (err) {
       const msg = err.response?.data?.detail || err.response?.data?.message || "Authentication failed";
       setError(msg);
@@ -76,8 +95,10 @@ export default function Login() {
           token: tokenResponse.access_token,
         });
         login(res.data);
-        toast.success("Google authentication successful.");
-        navigate("/");
+        
+        // ✅ Role Check
+        handleRedirect(res.data.user);
+
       } catch (err) {
         toast.error(err.response?.data?.error || "Google login failed");
       }
@@ -86,16 +107,47 @@ export default function Login() {
   });
 
   // 3. Firebase Phone Auth Logic
-  const setupRecaptcha = () => {
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
-        size: "invisible",
-        callback: () => {
-          // reCAPTCHA solved
-        },
-      });
+  
+  // ✅ FIX: Only initialize Recaptcha when 'phone' mode is active AND element exists
+  useEffect(() => {
+    let verifier = null;
+
+    if (loginMethod === "phone") {
+      // Small timeout to ensure the DOM element is rendered by React first
+      const timer = setTimeout(() => {
+        const container = document.getElementById("recaptcha-container");
+        
+        if (container && !recaptchaVerifierRef.current) {
+          try {
+            verifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+              size: "invisible",
+              callback: (response) => {
+                // reCAPTCHA solved
+                console.log("Recaptcha verified");
+              },
+              "expired-callback": () => {
+                console.log("Recaptcha expired");
+              }
+            });
+            recaptchaVerifierRef.current = verifier;
+            window.recaptchaVerifier = verifier;
+          } catch (err) {
+            console.error("Recaptcha Init Error:", err);
+          }
+        }
+      }, 500); // 500ms delay to wait for animation
+      return () => clearTimeout(timer);
+    } else {
+      // If switching back to email, we can optionally clear the verifier
+      if (recaptchaVerifierRef.current) {
+        try {
+            recaptchaVerifierRef.current.clear();
+        } catch(e) { /* ignore */ }
+        recaptchaVerifierRef.current = null;
+        window.recaptchaVerifier = null;
+      }
     }
-  };
+  }, [loginMethod]); // Re-run when tab changes
 
   const handleSendOtp = async (e) => {
     e.preventDefault();
@@ -109,17 +161,36 @@ export default function Login() {
     }
 
     try {
-      setupRecaptcha();
       const appVerifier = window.recaptchaVerifier;
-      const formattedPhone = `+91${phone}`; // Change +91 to your default country code if needed
+      
+      // Safety check
+      if (!appVerifier) {
+        setError("Please refresh the page and try again.");
+        return;
+      }
+
+      const formattedPhone = `+91${phone}`; 
       
       const confirmation = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
       setConfirmationResult(confirmation);
       toast.success(`OTP sent to ${formattedPhone}`);
     } catch (err) {
-      console.error(err);
-      setError("Failed to send OTP. Try again.");
+      console.error("Firebase Error:", err);
+      
+      if (err.code === 'auth/billing-not-enabled') {
+         setError("Quota Exceeded. Use Test Number: 1234567890");
+      } else if (err.code === 'auth/invalid-phone-number') {
+         setError("Invalid Phone Number");
+      } else {
+         setError("Failed to send OTP. Try again.");
+      }
       toast.error("Failed to send OTP.");
+      
+      // Reset captcha on error so user can try again
+      if(window.recaptchaVerifier) {
+          window.recaptchaVerifier.clear();
+          recaptchaVerifierRef.current = null;
+      }
     } finally {
       setIsLoading(false);
     }
@@ -143,8 +214,10 @@ export default function Login() {
 
       // 3. Login User
       login(res.data);
-      toast.success("Access Granted.");
-      navigate("/");
+      
+      // ✅ Role Check
+      handleRedirect(res.data.user);
+
     } catch (err) {
       console.error(err);
       setError("Invalid OTP or Server Error.");
@@ -251,6 +324,16 @@ export default function Login() {
                     </button>
                     </div>
 
+                    {/* Forgot Password Link */}
+                    <div className="flex justify-end -mt-2">
+                      <Link 
+                        to="/forgot-password" 
+                        className="text-[10px] text-gray-500 hover:text-yellow-500 transition-colors tracking-wide uppercase"
+                      >
+                        Forgot Password?
+                      </Link>
+                    </div>
+
                     {error && (
                         <div className="text-red-400 text-[10px] bg-red-900/10 border border-red-900/30 p-2 rounded">
                             {error}
@@ -291,7 +374,7 @@ export default function Login() {
                                     className="flex-1 py-2 bg-transparent text-sm text-white placeholder-gray-600 focus:outline-none"
                                 />
                             </div>
-                            {/* REQUIRED for Firebase */}
+                            {/* REQUIRED for Firebase - Must exist when useEffect runs */}
                             <div id="recaptcha-container"></div>
                         </div>
                     ) : (
@@ -360,4 +443,4 @@ export default function Login() {
       </div>
     </div>
   );
-}
+} 

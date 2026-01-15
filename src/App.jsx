@@ -22,6 +22,9 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import OrdersPage from "./nonAuth/OrdersPage";
 import PhoneLogin from "./common/pages/auth/PhoneLogin";
+import AddProduct from "./admin/AddProduct";
+import EditProduct from "./admin/EditProduct";
+import ForgotPassword from "./common/pages/auth/ForgotPassword";
 function App() {
   return (
     <>
@@ -35,6 +38,7 @@ function App() {
         <Route path="/signup" element={<Register />} />
         <Route path="/confirmation" element={<Confirmation />} />
         <Route path="/phone-loggin" element={<PhoneLogin />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
         {/* admin routes*/}
         <Route element={<AdminRoute />}>
@@ -42,6 +46,8 @@ function App() {
           <Route path="/manageorders" element={<ManageOrders />} />
           <Route path="/manageusers" element={<ManageUsers />} />
           <Route path="/manageproducts" element={<ManageProducts />} />
+          <Route path="/add-product" element={<AddProduct />} />
+          <Route path="/edit-product/:id" element={<EditProduct />} />
         </Route>
 
         {/* Routes with Navbar/Footer wrapped in MainLayout */}

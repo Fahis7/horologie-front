@@ -28,8 +28,17 @@ function Navbar() {
   // Wishlist: Total number of items in the list
   const wishlistCount = user?.wishlist?.length || 0;
 
-  // Display Name Logic
-  const displayName = user?.first_name || user?.name || user?.email?.split('@')[0] || "User";
+  // ==========================================
+  // 2. DISPLAY NAME LOGIC (UPDATED FOR MOBILE)
+  // ==========================================
+  // Get the raw name from the user object
+  const rawName = user?.first_name || user?.name || user?.email?.split('@')[0] || "User";
+
+  // Check if the name is "Mobile" (our backend default) or looks like a phone number (digits)
+  const isMobileUser = rawName === "Mobile" || /^\+?\d+$/.test(rawName);
+
+  // If mobile user, show "My Account", otherwise show their name
+  const displayName = isMobileUser ? "My Account" : rawName;
 
   // Scroll & Menu State
   const isScrollEffectPage = location.pathname === "/" || location.pathname === "/products";
@@ -124,9 +133,7 @@ function Navbar() {
         {/* Desktop Icons */}
         <ul className="flex items-center space-x-4 lg:space-x-6">
           
-          {/* ========================================== */}
-          {/* 2. WISHLIST ICON WITH DYNAMIC COUNT        */}
-          {/* ========================================== */}
+          {/* Wishlist Icon */}
           <li className="relative hidden lg:block">
             <Link to="/wishlist">
               <FaRegHeart className={`text-lg ${iconColor}`} />
@@ -139,9 +146,7 @@ function Navbar() {
             </Link>
           </li>
 
-          {/* ========================================== */}
-          {/* 3. CART ICON WITH DYNAMIC COUNT            */}
-          {/* ========================================== */}
+          {/* Cart Icon */}
           <li className="relative hidden lg:block">
             <Link to="/cart">
               <HiOutlineShoppingCart className={`text-xl ${iconColor}`} />
@@ -162,6 +167,7 @@ function Navbar() {
                   onClick={toggleDropdown}
                   className={`text-base font-light cursor-pointer select-none ${iconColor}`}
                 >
+                  {/* This will now display "My Account" if logged in via phone */}
                   {displayName}
                 </div>
                 {dropdownOpen && (
@@ -218,7 +224,6 @@ function Navbar() {
             </Link>
           )}
 
-          {/* Mobile Wishlist Link with Count */}
           <Link
             to="/wishlist"
             onClick={() => setIsMenuOpen(false)}
@@ -228,7 +233,6 @@ function Navbar() {
             Wishlist ({wishlistCount})
           </Link>
 
-          {/* Mobile Cart Link with Count */}
           <Link
             to="/cart"
             onClick={() => setIsMenuOpen(false)}

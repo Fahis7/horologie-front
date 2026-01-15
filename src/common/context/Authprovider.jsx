@@ -8,11 +8,11 @@ export default function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🛠️ CONFIG: Added WISHLIST endpoint
+  // 🛠️ CONFIG: API Endpoints
   const URLS = {
     PROFILE: "/auth/profile/",
     CART: "/cart/",
-    WISHLIST: "/wishlist/", // ✅ Added this
+    WISHLIST: "/wishlist/",
     LOGOUT: "/auth/logout/",
   };
 
@@ -33,13 +33,13 @@ export default function AuthProvider({ children }) {
         const [userRes, cartRes, wishlistRes] = await Promise.all([
           API.get(URLS.PROFILE),
           API.get(URLS.CART),
-          API.get(URLS.WISHLIST), // Fetch wishlist here
+          API.get(URLS.WISHLIST),
         ]);
 
         setUser({
-          ...userRes.data,           // User details
-          cart: cartRes.data.items || [], // Cart Items
-          wishlist: wishlistRes.data || [], // ✅ Wishlist Items (Now Navbar count works!)
+          ...userRes.data,           // User details from Django
+          cart: cartRes.data.items || [], 
+          wishlist: wishlistRes.data || [], 
         });
 
       } catch (error) {
@@ -56,15 +56,24 @@ export default function AuthProvider({ children }) {
   }, []);
 
   // ============================
-  // 2. Login
+  // 2. Login (UPDATED WITH FIX)
   // ============================
   const login = async (data) => {
-    // 'data' contains tokens and basic user info from login response
+    // 'data' contains { access, refresh, user: {...} }
     localStorage.setItem("accessToken", data.access);
     localStorage.setItem("refreshToken", data.refresh);
 
+    // 🚨 THE FIX: Set User State IMMEDIATELY 🚨
+    // This allows the AdminRoute to see the user (and is_staff) instantly
+    // before the async cart fetch finishes.
+    setUser({
+      ...data.user, 
+      cart: [],       // Placeholder
+      wishlist: [],   // Placeholder
+    });
+
+    // ⏳ Background Fetch: Load Cart & Wishlist
     try {
-      // ✅ Fetch Cart and Wishlist in parallel
       let cartItems = [];
       let wishlistItems = [];
 
@@ -74,21 +83,22 @@ export default function AuthProvider({ children }) {
           API.get(URLS.WISHLIST)
         ]);
         
-        cartItems = cartRes.data.items;
-        wishlistItems = wishlistRes.data;
+        cartItems = cartRes.data.items || [];
+        wishlistItems = wishlistRes.data || [];
       } catch (err) {
         console.warn("Could not load secondary data", err);
       }
 
-      setUser({
-        ...data.user, 
-        cart: cartItems || [],
-        wishlist: wishlistItems || [], // ✅ Set wishlist on login
-      });
+      // Update state again with the full data (Functional update is safer)
+      setUser((prevUser) => ({
+        ...prevUser, 
+        cart: cartItems,
+        wishlist: wishlistItems,
+      }));
       
     } catch (error) {
       console.error("Login Error", error);
-      toast.error("Login succeeded but failed to load data");
+      // We don't show an error toast here because the user is already logged in successfully
     }
   };
 
@@ -98,6 +108,7 @@ export default function AuthProvider({ children }) {
   const logout = async () => {
     const refresh = localStorage.getItem("refreshToken");
     
+    // Clear state immediately for better UI response
     setUser(null);
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
