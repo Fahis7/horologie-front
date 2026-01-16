@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 
-import { createOrder } from "../../../api/orderservice";
+import { createOrder } from "../../../api/orderService";
 import { toast } from "react-hot-toast";
 
 const StripePayment = ({ formData, onSuccess }) => {

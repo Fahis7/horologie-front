@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../common/context/Authprovider";
-import { createPaymentIntent } from "../../api/orderservice";
+import { createPaymentIntent } from "../../api/orderService";
 import { toast } from "react-hot-toast";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
