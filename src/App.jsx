@@ -9,7 +9,7 @@ import MainLayout from "./layout/MainLayout";
 import Cart from "./nonAuth/Cart";
 import { Toaster } from "react-hot-toast";
 import Wishlist from "./nonAuth/WishList";
-import Checkout from "./nonAuth/CheckOut";
+import Checkout from "./nonAuth/CheckoutPage";
 import ErrorResponse from "./nonAuth/ErrorResponse";
 import Confirmation from "./nonAuth/Confirmation";
 import CertificatePage from "./nonAuth/CertificatePage";
