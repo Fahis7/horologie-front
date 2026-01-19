@@ -19,7 +19,9 @@ import {
   ArrowLeft,
   RefreshCw,
   Watch,
-  Shield
+  Shield,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
 
 const OrdersPage = () => {
@@ -28,6 +30,7 @@ const OrdersPage = () => {
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [expandedItems, setExpandedItems] = useState({});
 
   // Fetch Orders
   const fetchUserOrders = async () => {
@@ -98,11 +101,30 @@ const OrdersPage = () => {
     });
   };
 
+  // Mobile date format
+  const formatDateMobile = (dateString) => {
+    if (!dateString) return "";
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric"
+    });
+  };
+
+  // Toggle mobile expansion
+  const toggleMobileExpansion = (orderId, itemIndex) => {
+    const key = `${orderId}-${itemIndex}`;
+    setExpandedItems(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
+
   return (
     <div className="min-h-screen bg-white font-sans text-gray-900">
       
-      {/* Hero Section */}
-      <div className="relative bg-gradient-to-b from-gray-50 to-white py-20 shadow-sm">
+      {/* Desktop Hero Section */}
+      <div className="hidden md:block relative bg-gradient-to-b from-gray-50 to-white py-20 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <button
             onClick={() => navigate(-1)}
@@ -124,10 +146,40 @@ const OrdersPage = () => {
         </div>
       </div>
 
+      {/* Mobile Header */}
+      <div className="md:hidden sticky top-0 z-40 bg-white border-b border-gray-100 px-4 py-4 flex items-center justify-between">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center text-gray-600"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+        <h1 className="text-lg font-light tracking-tight text-gray-900">Your Collection</h1>
+        <button
+          onClick={fetchUserOrders}
+          className="p-2 text-gray-600 hover:text-gray-900"
+        >
+          <RefreshCw className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* Mobile Hero */}
+      <div className="md:hidden bg-gradient-to-b from-gray-50 to-white px-4 py-6">
+        <div className="text-center">
+          <h1 className="text-xl font-extralight tracking-tight text-gray-900 mb-2">
+            Private Collection
+          </h1>
+          <p className="text-sm text-gray-600">
+            Your curated timepieces
+          </p>
+          <div className="w-16 h-0.5 bg-gray-300 mx-auto mt-3"></div>
+        </div>
+      </div>
+
       {/* Main Content Area */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        {/* Header Actions */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16">
+        {/* Desktop Header Actions */}
+        <div className="hidden md:flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
           <div>
             <h2 className="text-2xl font-light text-gray-800">
               Your Acquisitions
@@ -156,171 +208,352 @@ const OrdersPage = () => {
           </div>
         </div>
 
+        {/* Mobile Stats */}
+        <div className="md:hidden mb-6">
+          <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100 shadow-sm">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-xs text-gray-500 uppercase tracking-wider">Collection</p>
+                <p className="text-lg font-light text-gray-900">
+                  {orders.reduce((total, order) => total + order.items.length, 0)} pieces
+                </p>
+              </div>
+              <button
+                onClick={() => navigate("/products")}
+                className="px-4 py-2 bg-gray-900 text-white text-xs font-medium rounded-lg hover:bg-black transition-all flex items-center gap-2"
+              >
+                <Watch className="w-3 h-3" />
+                Explore
+              </button>
+            </div>
+          </div>
+        </div>
+
         {isLoading ? (
           <div className="flex justify-center items-center py-20">
             <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-900"></div>
           </div>
         ) : orders.length === 0 ? (
-          /* Empty State */
-          <div className="text-center py-20 bg-gradient-to-b from-gray-50 to-white rounded-2xl shadow-sm p-12 border border-gray-100">
-            <div className="w-24 h-24 mx-auto mb-8 flex items-center justify-center text-gray-300">
-              <Watch className="h-20 w-20" />
+          /* Empty State - Responsive */
+          <div className="text-center py-12 md:py-20 bg-gradient-to-b from-gray-50 to-white rounded-2xl shadow-sm p-6 md:p-12 border border-gray-100">
+            <div className="w-16 h-16 md:w-24 md:h-24 mx-auto mb-6 md:mb-8 flex items-center justify-center text-gray-300">
+              <Watch className="h-12 w-12 md:h-20 md:w-20" />
             </div>
-            <h3 className="text-2xl font-light text-gray-800 mb-4">
+            <h3 className="text-xl md:text-2xl font-light text-gray-800 mb-3 md:mb-4">
               Your collection awaits its first masterpiece.
             </h3>
-            <p className="text-gray-500 mb-10 max-w-lg mx-auto leading-relaxed text-lg">
+            <p className="text-gray-500 mb-8 md:mb-10 max-w-lg mx-auto leading-relaxed text-sm md:text-lg">
               Explore our exquisite range of timepieces and begin building your legacy.
             </p>
             <button
               onClick={() => navigate("/products")}
-              className="inline-flex items-center justify-center px-12 py-4 border-2 border-gray-900 text-base font-medium tracking-wider uppercase text-gray-900 bg-white hover:bg-gray-900 hover:text-white transition-all duration-300 shadow-sm group"
+              className="inline-flex items-center justify-center px-8 md:px-12 py-3 md:py-4 border-2 border-gray-900 text-sm md:text-base font-medium tracking-wider uppercase text-gray-900 bg-white hover:bg-gray-900 hover:text-white transition-all duration-300 shadow-sm group"
             >
               Discover Watches
-              <ChevronRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+              <ChevronRight className="w-4 h-4 md:w-5 md:h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
         ) : (
-          /* Orders List - Display items individually */
-          <div className="space-y-8">
-            {orders.flatMap(order => 
-              order.items.map((item, index) => (
-                <div
-                  key={`${order.id}-${index}`}
-                  className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300"
-                >
-                  {/* Order Header */}
-                  <div className="px-8 py-6 bg-gradient-to-r from-gray-50 to-white border-b border-gray-100">
-                    <div className="flex flex-col md:flex-row justify-between gap-4">
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8">
-                        <div className="flex items-center gap-3">
-                          <Calendar className="w-5 h-5 text-gray-400" />
-                          <div>
-                            <p className="text-xs text-gray-500 uppercase tracking-wider">Order Date</p>
-                            <p className="text-sm font-medium text-gray-900">{formatDate(order.created_at)}</p>
+          <>
+            {/* Desktop Orders List */}
+            <div className="hidden md:block space-y-8">
+              {orders.flatMap(order => 
+                order.items.map((item, index) => (
+                  <div
+                    key={`${order.id}-${index}`}
+                    className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300"
+                  >
+                    {/* Order Header */}
+                    <div className="px-8 py-6 bg-gradient-to-r from-gray-50 to-white border-b border-gray-100">
+                      <div className="flex flex-col md:flex-row justify-between gap-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8">
+                          <div className="flex items-center gap-3">
+                            <Calendar className="w-5 h-5 text-gray-400" />
+                            <div>
+                              <p className="text-xs text-gray-500 uppercase tracking-wider">Order Date</p>
+                              <p className="text-sm font-medium text-gray-900">{formatDate(order.created_at)}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-3">
+                            <Shield className="w-5 h-5 text-gray-400" />
+                            <div>
+                              <p className="text-xs text-gray-500 uppercase tracking-wider">Order ID</p>
+                              <p className="text-sm font-medium text-gray-900">#{order.id}</p>
+                            </div>
                           </div>
                         </div>
-                        
-                        <div className="flex items-center gap-3">
-                          <Shield className="w-5 h-5 text-gray-400" />
-                          <div>
-                            <p className="text-xs text-gray-500 uppercase tracking-wider">Order ID</p>
-                            <p className="text-sm font-medium text-gray-900">#{order.id}</p>
+
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-2">
+                            {getStatusIcon(order.status)}
+                            <span className={`px-3 py-1.5 text-xs font-semibold uppercase tracking-wider rounded-full border ${getStatusStyle(order.status)}`}>
+                              {order.status?.charAt(0).toUpperCase() + order.status?.slice(1)}
+                            </span>
                           </div>
                         </div>
-                      </div>
-
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2">
-                          {getStatusIcon(order.status)}
-                          <span className={`px-3 py-1.5 text-xs font-semibold uppercase tracking-wider rounded-full border ${getStatusStyle(order.status)}`}>
-                            {order.status?.charAt(0).toUpperCase() + order.status?.slice(1)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Watch Details */}
-                  <div className="p-8 flex flex-col lg:flex-row gap-8">
-                    {/* Watch Image */}
-                    <div className="lg:w-1/3">
-                      <div className="aspect-square bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl overflow-hidden flex items-center justify-center border border-gray-200">
-                        {item.product?.image ? (
-                          <img
-                            src={item.product.image}
-                            alt={item.product.name}
-                            className="w-full h-full object-contain p-8 transition-transform duration-500 hover:scale-105"
-                          />
-                        ) : (
-                          <Watch className="w-20 h-20 text-gray-300" />
-                        )}
                       </div>
                     </div>
 
                     {/* Watch Details */}
-                    <div className="lg:w-2/3">
-                      <div className="mb-8">
-                        <h3 className="text-2xl font-light text-gray-900 mb-2 leading-tight">
-                          {item.product?.name || item.product_name}
-                        </h3>
-                        <p className="text-sm text-gray-500 uppercase tracking-wider mb-6">
-                          Reference: <span className="font-semibold text-gray-900">
-                            {String(item.product?.id || '000000').padStart(6, '0')}
-                          </span>
-                        </p>
-                        
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                          <div className="space-y-1">
-                            <p className="text-xs text-gray-500 uppercase tracking-wider">Quantity</p>
-                            <p className="text-lg font-medium text-gray-900">{item.quantity}</p>
+                    <div className="p-8 flex flex-col lg:flex-row gap-8">
+                      {/* Watch Image */}
+                      <div className="lg:w-1/3">
+                        <div className="aspect-square bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl overflow-hidden flex items-center justify-center border border-gray-200">
+                          {item.product?.image ? (
+                            <img
+                              src={item.product.image}
+                              alt={item.product.name}
+                              className="w-full h-full object-contain p-8 transition-transform duration-500 hover:scale-105"
+                            />
+                          ) : (
+                            <Watch className="w-20 h-20 text-gray-300" />
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Watch Details */}
+                      <div className="lg:w-2/3">
+                        <div className="mb-8">
+                          <h3 className="text-2xl font-light text-gray-900 mb-2 leading-tight">
+                            {item.product?.name || item.product_name}
+                          </h3>
+                          <p className="text-sm text-gray-500 uppercase tracking-wider mb-6">
+                            Reference: <span className="font-semibold text-gray-900">
+                              {String(item.product?.id || '000000').padStart(6, '0')}
+                            </span>
+                          </p>
+                          
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                            <div className="space-y-1">
+                              <p className="text-xs text-gray-500 uppercase tracking-wider">Quantity</p>
+                              <p className="text-lg font-medium text-gray-900">{item.quantity}</p>
+                            </div>
+                            <div className="space-y-1">
+                              <p className="text-xs text-gray-500 uppercase tracking-wider">Unit Price</p>
+                              <p className="text-lg font-medium text-gray-900">₹{Number(item.price).toLocaleString()}</p>
+                            </div>
+                            <div className="space-y-1">
+                              <p className="text-xs text-gray-500 uppercase tracking-wider">Item Total</p>
+                              <p className="text-2xl font-light text-gray-900">
+                                ₹{(item.price * item.quantity).toLocaleString()}
+                              </p>
+                            </div>
+                            <div className="space-y-1">
+                              <p className="text-xs text-gray-500 uppercase tracking-wider">Order Total</p>
+                              <p className="text-2xl font-light text-gray-900 font-serif">
+                                ₹{Number(order.total_price).toLocaleString()}
+                              </p>
+                            </div>
                           </div>
-                          <div className="space-y-1">
-                            <p className="text-xs text-gray-500 uppercase tracking-wider">Unit Price</p>
-                            <p className="text-lg font-medium text-gray-900">₹{Number(item.price).toLocaleString()}</p>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex flex-wrap gap-4 pt-6 border-t border-gray-100">
+                          <button
+                            onClick={() => navigate("/certificate", {
+                              state: {
+                                item: item.product,
+                                date: order.created_at,
+                                orderId: order.id
+                              }
+                            })}
+                            className="px-6 py-3 border border-yellow-600 text-yellow-700 text-sm font-medium rounded-lg hover:bg-yellow-50 transition-all flex items-center gap-2 group"
+                          >
+                            <FileText className="w-4 h-4" />
+                            View Certificate
+                            <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                          </button>
+
+                          <button
+                            onClick={() => setSelectedOrder(order)}
+                            className="px-6 py-3 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-all flex items-center gap-2"
+                          >
+                            <Eye className="w-4 h-4" />
+                            Order Details
+                          </button>
+
+                          {['pending', 'processing'].includes(order.status?.toLowerCase()) && (
+                            <button
+                              onClick={() => handleCancelOrder(order.id)}
+                              className="px-6 py-3 border border-red-300 text-red-700 text-sm font-medium rounded-lg hover:bg-red-50 transition-all flex items-center gap-2 ml-auto"
+                            >
+                              <XCircle className="w-4 h-4" />
+                              Cancel Order
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Mobile Orders List */}
+            <div className="md:hidden space-y-4">
+              {orders.flatMap(order => 
+                order.items.map((item, index) => {
+                  const itemKey = `${order.id}-${index}`;
+                  const isExpanded = expandedItems[itemKey];
+
+                  return (
+                    <div
+                      key={itemKey}
+                      className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden"
+                    >
+                      {/* Mobile Card Header */}
+                      <div 
+                        className="p-4 cursor-pointer"
+                        onClick={() => toggleMobileExpansion(order.id, index)}
+                      >
+                        <div className="flex gap-3">
+                          {/* Product Image */}
+                          <div className="flex-shrink-0">
+                            <div className="w-20 h-20 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg overflow-hidden flex items-center justify-center border border-gray-200">
+                              {item.product?.image ? (
+                                <img
+                                  src={item.product.image}
+                                  alt={item.product.name}
+                                  className="w-full h-full object-contain p-2"
+                                />
+                              ) : (
+                                <Watch className="w-8 h-8 text-gray-300" />
+                              )}
+                            </div>
                           </div>
-                          <div className="space-y-1">
-                            <p className="text-xs text-gray-500 uppercase tracking-wider">Item Total</p>
-                            <p className="text-2xl font-light text-gray-900">
-                              ₹{(item.price * item.quantity).toLocaleString()}
-                            </p>
-                          </div>
-                          <div className="space-y-1">
-                            <p className="text-xs text-gray-500 uppercase tracking-wider">Order Total</p>
-                            <p className="text-2xl font-light text-gray-900 font-serif">
-                              ₹{Number(order.total_price).toLocaleString()}
-                            </p>
+
+                          {/* Basic Info */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1 pr-2">
+                                <h3 className="text-sm font-medium text-gray-900 truncate">
+                                  {item.product?.name || item.product_name}
+                                </h3>
+                                <p className="text-xs text-gray-500 mt-1">
+                                  Ref: {String(item.product?.id || '000000').padStart(6, '0')}
+                                </p>
+                              </div>
+                              {isExpanded ? (
+                                <ChevronUp className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                              ) : (
+                                <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                              )}
+                            </div>
+
+                            <div className="mt-3 flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                {getStatusIcon(order.status)}
+                                <span className={`text-xs px-2 py-1 rounded-full border ${getStatusStyle(order.status)}`}>
+                                  {order.status?.charAt(0).toUpperCase() + order.status?.slice(1)}
+                                </span>
+                              </div>
+                              <p className="text-lg font-light text-gray-900">
+                                ₹{(item.price * item.quantity).toLocaleString()}
+                              </p>
+                            </div>
                           </div>
                         </div>
                       </div>
 
-                      {/* Action Buttons */}
-                      <div className="flex flex-wrap gap-4 pt-6 border-t border-gray-100">
-                        <button
-                          onClick={() => navigate("/certificate", {
-                            state: {
-                              item: item.product,
-                              date: order.created_at,
-                              orderId: order.id
-                            }
-                          })}
-                          className="px-6 py-3 border border-yellow-600 text-yellow-700 text-sm font-medium rounded-lg hover:bg-yellow-50 transition-all flex items-center gap-2 group"
-                        >
-                          <FileText className="w-4 h-4" />
-                          View Certificate
-                          <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                        </button>
+                      {/* Expanded Details */}
+                      {isExpanded && (
+                        <div className="border-t border-gray-100 p-4 animate-fadeIn">
+                          {/* Order Info */}
+                          <div className="grid grid-cols-2 gap-3 mb-4">
+                            <div className="space-y-1">
+                              <p className="text-xs text-gray-500 uppercase tracking-wider">Order Date</p>
+                              <div className="flex items-center gap-2">
+                                <Calendar className="w-3 h-3 text-gray-400" />
+                                <p className="text-sm font-medium text-gray-900">{formatDateMobile(order.created_at)}</p>
+                              </div>
+                            </div>
+                            
+                            <div className="space-y-1">
+                              <p className="text-xs text-gray-500 uppercase tracking-wider">Order ID</p>
+                              <div className="flex items-center gap-2">
+                                <Shield className="w-3 h-3 text-gray-400" />
+                                <p className="text-sm font-medium text-gray-900">#{order.id}</p>
+                              </div>
+                            </div>
 
-                        <button
-                          onClick={() => setSelectedOrder(order)}
-                          className="px-6 py-3 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-all flex items-center gap-2"
-                        >
-                          <Eye className="w-4 h-4" />
-                          Order Details
-                        </button>
+                            <div className="space-y-1">
+                              <p className="text-xs text-gray-500 uppercase tracking-wider">Quantity</p>
+                              <p className="text-sm font-medium text-gray-900">{item.quantity}</p>
+                            </div>
 
-                        {['pending', 'processing'].includes(order.status?.toLowerCase()) && (
-                          <button
-                            onClick={() => handleCancelOrder(order.id)}
-                            className="px-6 py-3 border border-red-300 text-red-700 text-sm font-medium rounded-lg hover:bg-red-50 transition-all flex items-center gap-2 ml-auto"
-                          >
-                            <XCircle className="w-4 h-4" />
-                            Cancel Order
-                          </button>
-                        )}
-                      </div>
+                            <div className="space-y-1">
+                              <p className="text-xs text-gray-500 uppercase tracking-wider">Unit Price</p>
+                              <p className="text-sm font-medium text-gray-900">₹{Number(item.price).toLocaleString()}</p>
+                            </div>
+                          </div>
+
+                          {/* Payment Info */}
+                          <div className="bg-gray-50 rounded-lg p-3 mb-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <CreditCard className="w-4 h-4 text-gray-400" />
+                                <div>
+                                  <p className="text-xs text-gray-500 uppercase tracking-wider">Payment</p>
+                                  <p className="text-sm font-medium text-gray-900">
+                                    {order.payment_status || 'Completed'}
+                                  </p>
+                                </div>
+                              </div>
+                              <p className="text-lg font-light text-gray-900 font-serif">
+                                ₹{Number(order.total_price).toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="space-y-2">
+                            <button
+                              onClick={() => navigate("/certificate", {
+                                state: {
+                                  item: item.product,
+                                  date: order.created_at,
+                                  orderId: order.id
+                                }
+                              })}
+                              className="w-full px-4 py-2.5 border border-yellow-600 text-yellow-700 text-sm font-medium rounded-lg hover:bg-yellow-50 transition-all flex items-center justify-center gap-2"
+                            >
+                              <FileText className="w-4 h-4" />
+                              View Certificate
+                            </button>
+
+                            <button
+                              onClick={() => setSelectedOrder(order)}
+                              className="w-full px-4 py-2.5 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
+                            >
+                              <Eye className="w-4 h-4" />
+                              Order Details
+                            </button>
+
+                            {['pending', 'processing'].includes(order.status?.toLowerCase()) && (
+                              <button
+                                onClick={() => handleCancelOrder(order.id)}
+                                className="w-full px-4 py-2.5 border border-red-300 text-red-700 text-sm font-medium rounded-lg hover:bg-red-50 transition-all flex items-center justify-center gap-2"
+                              >
+                                <XCircle className="w-4 h-4" />
+                                Cancel Order
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+                  );
+                })
+              )}
+            </div>
+          </>
         )}
       </div>
 
-      {/* Footer Note */}
+      {/* Footer Note - Desktop */}
       {orders.length > 0 && (
-        <div className="bg-gradient-to-b from-white to-gray-50 py-16 mt-12 border-t border-gray-100">
+        <div className="hidden md:block bg-gradient-to-b from-white to-gray-50 py-16 mt-12 border-t border-gray-100">
           <div className="max-w-4xl mx-auto px-4 text-center">
             <div className="w-16 h-16 mx-auto mb-6 flex items-center justify-center rounded-full bg-gray-100">
               <Watch className="w-8 h-8 text-gray-400" />
@@ -335,27 +568,47 @@ const OrdersPage = () => {
         </div>
       )}
 
+      {/* Mobile Footer */}
+      {orders.length > 0 && (
+        <div className="md:hidden bg-gradient-to-b from-white to-gray-50 py-8 mt-8 border-t border-gray-100">
+          <div className="max-w-4xl mx-auto px-4 text-center">
+            <div className="w-12 h-12 mx-auto mb-4 flex items-center justify-center rounded-full bg-gray-100">
+              <Watch className="w-6 h-6 text-gray-400" />
+            </div>
+            <p className="text-xs text-gray-400 uppercase tracking-[0.2em] mb-3">
+              Horologie Maison
+            </p>
+            <p className="text-sm text-gray-600 max-w-2xl mx-auto leading-relaxed font-serif italic">
+              "Each timepiece in your collection is a testament to precision, artistry, and a legacy that transcends generations."
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Order Detail Modal */}
       {selectedOrder && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-2xl border border-gray-200">
-            <div className="flex justify-between items-start mb-8">
-              <div>
-                <h3 className="text-2xl font-light text-gray-900 mb-2">Order #{selectedOrder.id}</h3>
-                <p className="text-gray-500">
-                  Placed on {formatDate(selectedOrder.created_at)}
-                </p>
+        <div className="fixed inset-0 bg-black/50 flex items-start md:items-center justify-center z-50 p-0 md:p-4 backdrop-blur-sm overflow-y-auto">
+          <div className="bg-white w-full min-h-screen md:min-h-0 md:rounded-2xl md:shadow-2xl md:p-8 md:w-full md:max-w-2xl border-0 md:border border-gray-200">
+            {/* Mobile Modal Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-4 md:px-0 md:py-0 md:relative md:border-0">
+              <div className="flex justify-between items-center md:mb-8">
+                <div>
+                  <h3 className="text-lg md:text-2xl font-light text-gray-900 md:mb-2">Order #{selectedOrder.id}</h3>
+                  <p className="text-sm text-gray-500 md:block">
+                    Placed on {formatDate(selectedOrder.created_at)}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setSelectedOrder(null)}
+                  className="text-gray-400 hover:text-gray-600 md:text-gray-400"
+                >
+                  ✕
+                </button>
               </div>
-              <button
-                onClick={() => setSelectedOrder(null)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                ✕
-              </button>
             </div>
 
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-6">
+            <div className="p-4 md:p-0 md:space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-0">
                 <div className="space-y-2">
                   <p className="text-sm text-gray-500 uppercase tracking-wider">Status</p>
                   <div className="flex items-center gap-2">
@@ -383,7 +636,7 @@ const OrdersPage = () => {
                   {selectedOrder.items?.map((item, index) => (
                     <div key={index} className="flex items-center justify-between py-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-lg bg-gray-50 flex items-center justify-center border border-gray-200">
+                        <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-gray-50 flex items-center justify-center border border-gray-200">
                           {item.product?.image ? (
                             <img 
                               src={item.product.image} 
@@ -391,7 +644,7 @@ const OrdersPage = () => {
                               className="w-full h-full object-contain p-1"
                             />
                           ) : (
-                            <Watch className="w-6 h-6 text-gray-400" />
+                            <Watch className="w-4 h-4 md:w-6 md:h-6 text-gray-400" />
                           )}
                         </div>
                         <div>
@@ -399,7 +652,7 @@ const OrdersPage = () => {
                           <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
                         </div>
                       </div>
-                      <p className="text-gray-900">
+                      <p className="text-gray-900 font-medium">
                         ₹{Number(item.price * item.quantity).toLocaleString()}
                       </p>
                     </div>
@@ -417,7 +670,7 @@ const OrdersPage = () => {
                     <span className="text-gray-500">Shipping</span>
                     <span className="text-gray-900">₹0</span>
                   </div>
-                  <div className="flex justify-between text-lg font-light pt-3 border-t border-gray-200">
+                  <div className="flex justify-between text-base md:text-lg font-light pt-3 border-t border-gray-200">
                     <span className="text-gray-900">Total</span>
                     <span className="text-gray-900 font-serif">
                       ₹{Number(selectedOrder.total_price).toLocaleString()}
@@ -427,27 +680,46 @@ const OrdersPage = () => {
               </div>
             </div>
 
-            <div className="flex justify-end gap-4 pt-6 mt-6 border-t border-gray-200">
-              <button
-                onClick={() => setSelectedOrder(null)}
-                className="px-6 py-2.5 text-gray-600 hover:text-gray-900 text-sm font-medium"
-              >
-                Close
-              </button>
-              <button
-                onClick={() => {
-                  // Print functionality
-                  window.print();
-                }}
-                className="px-6 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-black transition-colors flex items-center gap-2"
-              >
-                <Download className="w-4 h-4" />
-                Print Invoice
-              </button>
+            <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 md:p-0 md:relative md:border-0">
+              <div className="flex flex-col md:flex-row gap-3 md:gap-4 pt-4 md:pt-6 mt-4 md:mt-6 md:border-t border-gray-200">
+                <button
+                  onClick={() => setSelectedOrder(null)}
+                  className="px-6 py-2.5 text-gray-600 hover:text-gray-900 text-sm font-medium rounded-lg border border-gray-300 md:border-0 md:rounded-none"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => {
+                    window.print();
+                  }}
+                  className="px-6 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-black transition-colors flex items-center justify-center gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  Print Invoice
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
+
+      {/* Add custom CSS for mobile animations */}
+      <style jsx>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        .animate-fadeIn {
+          animation: fadeIn 0.2s ease-out;
+        }
+      `}</style>
     </div>
   );
 };
