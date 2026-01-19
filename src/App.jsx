@@ -25,9 +25,11 @@ import PhoneLogin from "./common/pages/auth/PhoneLogin";
 import AddProduct from "./admin/AddProduct";
 import EditProduct from "./admin/EditProduct";
 import ForgotPassword from "./common/pages/auth/ForgotPassword";
+import ScrollToTop from "./common/ScrollToTop";
 function App() {
   return (
     <>
+      <ScrollToTop /> 
       {/* Toast Notifications */}
       <Toaster position="top-center" reverseOrder={false} />
       <ToastContainer position="top-center" autoClose={1000} />
