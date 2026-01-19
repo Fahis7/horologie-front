@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Eye, EyeOff, Lock, Mail, Phone, Smartphone } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, Phone, Smartphone, ArrowLeft, Watch } from "lucide-react";
 import { useGoogleLogin } from "@react-oauth/google";
 import { AuthContext } from "../../context/Authprovider";
 import API from "../../../../api/Api";
@@ -14,7 +14,7 @@ import { auth } from "../../../firebaseConfig";
 // --- Visual Components ---
 const GrainOverlay = () => (
   <div
-    className="absolute inset-0 pointer-events-none z-0 opacity-[0.03] mix-blend-multiply"
+    className="fixed inset-0 pointer-events-none z-0 opacity-[0.03] mix-blend-multiply"
     style={{
       backgroundImage: `url("https://www.transparenttextures.com/patterns/stardust.png")`,
     }}
@@ -45,6 +45,7 @@ export default function Login() {
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [confirmationResult, setConfirmationResult] = useState(null);
+  const [showBackButton, setShowBackButton] = useState(false);
 
   // Use a Ref to track if recaptcha is already rendered to avoid duplicate widgets
   const recaptchaVerifierRef = useRef(null);
@@ -173,6 +174,7 @@ export default function Login() {
       
       const confirmation = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
       setConfirmationResult(confirmation);
+      setShowBackButton(true);
       toast.success(`OTP sent to ${formattedPhone}`);
     } catch (err) {
       console.error("Firebase Error:", err);
@@ -227,12 +229,40 @@ export default function Login() {
     }
   };
 
+  const handleBackToPhoneInput = () => {
+    setConfirmationResult(null);
+    setOtp("");
+    setShowBackButton(false);
+    setError("");
+  };
+
   return (
-    <div className="h-screen w-screen bg-[#050505] text-white flex overflow-hidden relative font-sans selection:bg-yellow-900 selection:text-white">
+    <div className="min-h-screen w-full bg-[#050505] text-white flex flex-col lg:flex-row overflow-hidden relative font-sans selection:bg-yellow-900 selection:text-white">
       <GrainOverlay />
 
-      {/* LEFT SIDE: VISUAL */}
-      <div className="hidden lg:block w-1/2 h-full relative overflow-hidden">
+      {/* TOP BAR FOR MOBILE */}
+      <div className="lg:hidden w-full p-4 flex items-center justify-between border-b border-gray-900 z-30">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-full bg-yellow-500/10 border border-yellow-500/20">
+            <Watch className="w-5 h-5 text-yellow-500" />
+          </div>
+          <div>
+            <h1 className="text-lg font-serif text-white">Horologie.</h1>
+            <p className="text-yellow-500 text-[10px] tracking-[0.2em] uppercase">
+              Est. 1924
+            </p>
+          </div>
+        </div>
+        <Link 
+          to="/"
+          className="text-xs text-gray-400 hover:text-white transition-colors px-3 py-1.5 border border-gray-800 rounded-full"
+        >
+          Back to Home
+        </Link>
+      </div>
+
+      {/* LEFT SIDE: VISUAL - Hidden on mobile, shown on desktop */}
+      <div className="hidden lg:flex lg:w-1/2 h-full relative overflow-hidden">
         <div className="absolute inset-0 bg-black/40 z-10" />
         <motion.img
           initial={{ scale: 1.1 }}
@@ -250,33 +280,63 @@ export default function Login() {
         </div>
       </div>
 
+      {/* MOBILE BACKGROUND IMAGE */}
+      <div className="lg:hidden absolute inset-0 z-0 opacity-20">
+        <img
+          src="https://images.unsplash.com/photo-1614164185128-e4ec99c436d7?q=80&w=600&auto=format&fit=crop"
+          alt="Watch Movement"
+          className="w-full h-full object-cover grayscale"
+        />
+      </div>
+
       {/* RIGHT SIDE: THE FORM */}
-      <div className="w-full lg:w-1/2 h-full flex items-end justify-center p-8 pb-16 relative z-20">
+      <div className="w-full lg:w-1/2 flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8 relative z-20">
         
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="w-full max-w-md"
+          className="w-full max-w-md bg-black/80 backdrop-blur-sm border border-gray-900 rounded-2xl p-6 sm:p-8"
         >
-          <div className="mb-6 text-center lg:text-left">
-            <h2 className="text-2xl font-serif text-white mb-1">Access Vault</h2>
-            <p className="text-gray-500 text-xs font-light">Select authentication method.</p>
+          {/* Back button for OTP verification */}
+          {showBackButton && (
+            <button
+              onClick={handleBackToPhoneInput}
+              className="flex items-center gap-2 text-xs text-gray-400 hover:text-white mb-6 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to phone input
+            </button>
+          )}
+
+          <div className="mb-6 text-center">
+            <h2 className="text-2xl sm:text-3xl font-serif text-white mb-1">Access Vault</h2>
+            <p className="text-gray-500 text-xs sm:text-sm font-light">Select authentication method</p>
           </div>
 
-          {/* TOGGLE SWITCH (Email vs Phone) */}
-          <div className="flex gap-4 mb-8 border-b border-gray-800 pb-2">
+          {/* TOGGLE SWITCH (Email vs Phone) - Better mobile layout */}
+          <div className="flex gap-3 sm:gap-4 mb-6 sm:mb-8 border-b border-gray-800 pb-2">
             <button 
-                onClick={() => { setLoginMethod("email"); setError(""); }}
-                className={`text-xs uppercase tracking-widest pb-2 transition-colors ${loginMethod === "email" ? "text-yellow-500 border-b border-yellow-500" : "text-gray-500 hover:text-white"}`}
+                onClick={() => { 
+                  setLoginMethod("email"); 
+                  setError("");
+                  setShowBackButton(false);
+                }}
+                className={`flex-1 text-xs sm:text-sm uppercase tracking-wider pb-2 transition-colors text-center ${loginMethod === "email" ? "text-yellow-500 border-b-2 border-yellow-500" : "text-gray-500 hover:text-white"}`}
             >
-                Email Access
+                <span className="hidden sm:inline">Email</span>
+                <span className="sm:hidden">Email</span>
             </button>
             <button 
-                onClick={() => { setLoginMethod("phone"); setError(""); }}
-                className={`text-xs uppercase tracking-widest pb-2 transition-colors ${loginMethod === "phone" ? "text-yellow-500 border-b border-yellow-500" : "text-gray-500 hover:text-white"}`}
+                onClick={() => { 
+                  setLoginMethod("phone"); 
+                  setError("");
+                  setShowBackButton(false);
+                }}
+                className={`flex-1 text-xs sm:text-sm uppercase tracking-wider pb-2 transition-colors text-center ${loginMethod === "phone" ? "text-yellow-500 border-b-2 border-yellow-500" : "text-gray-500 hover:text-white"}`}
             >
-                Mobile Access
+                <span className="hidden sm:inline">Mobile</span>
+                <span className="sm:hidden">Phone</span>
             </button>
           </div>
 
@@ -289,10 +349,10 @@ export default function Login() {
                     animate={{ opacity: 1, x: 0 }} 
                     exit={{ opacity: 0, x: 10 }}
                     onSubmit={handleEmailLogin} 
-                    className="space-y-5"
+                    className="space-y-4 sm:space-y-5"
                 >
                     <div className="group relative">
-                    <Mail className="absolute left-0 top-2.5 text-gray-500 w-4 h-4 transition-colors group-focus-within:text-yellow-600" />
+                    <Mail className="absolute left-3 top-3 sm:top-2.5 text-gray-500 w-4 h-4 sm:w-4 sm:h-4 transition-colors group-focus-within:text-yellow-600" />
                     <input
                         name="email"
                         type="email"
@@ -300,12 +360,12 @@ export default function Login() {
                         value={formData.email}
                         onChange={handleChange}
                         required
-                        className="w-full pl-8 pr-4 py-2 bg-transparent border-b border-gray-800 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-yellow-600 transition-colors"
+                        className="w-full pl-10 sm:pl-8 pr-4 py-3 sm:py-2 bg-gray-900/50 border border-gray-800 text-sm sm:text-base text-white placeholder-gray-500 rounded-lg focus:outline-none focus:border-yellow-600 focus:ring-1 focus:ring-yellow-600/20 transition-all"
                     />
                     </div>
 
                     <div className="group relative">
-                    <Lock className="absolute left-0 top-2.5 text-gray-500 w-4 h-4 transition-colors group-focus-within:text-yellow-600" />
+                    <Lock className="absolute left-3 top-3 sm:top-2.5 text-gray-500 w-4 h-4 sm:w-4 sm:h-4 transition-colors group-focus-within:text-yellow-600" />
                     <input
                         name="password"
                         type={showPassword ? "text" : "password"}
@@ -313,29 +373,29 @@ export default function Login() {
                         value={formData.password}
                         onChange={handleChange}
                         required
-                        className="w-full pl-8 pr-12 py-2 bg-transparent border-b border-gray-800 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-yellow-600 transition-colors"
+                        className="w-full pl-10 sm:pl-8 pr-12 py-3 sm:py-2 bg-gray-900/50 border border-gray-800 text-sm sm:text-base text-white placeholder-gray-500 rounded-lg focus:outline-none focus:border-yellow-600 focus:ring-1 focus:ring-yellow-600/20 transition-all"
                     />
                     <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-0 top-2.5 text-gray-500 hover:text-white transition-colors"
+                        className="absolute right-3 top-3 sm:top-2.5 text-gray-500 hover:text-white transition-colors p-1"
                     >
-                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        {showPassword ? <EyeOff size={18} className="sm:w-4 sm:h-4" /> : <Eye size={18} className="sm:w-4 sm:h-4" />}
                     </button>
                     </div>
 
                     {/* Forgot Password Link */}
-                    <div className="flex justify-end -mt-2">
+                    <div className="flex justify-end -mt-1">
                       <Link 
                         to="/forgot-password" 
-                        className="text-[10px] text-gray-500 hover:text-yellow-500 transition-colors tracking-wide uppercase"
+                        className="text-xs sm:text-[10px] text-gray-500 hover:text-yellow-500 transition-colors tracking-wide uppercase"
                       >
                         Forgot Password?
                       </Link>
                     </div>
 
                     {error && (
-                        <div className="text-red-400 text-[10px] bg-red-900/10 border border-red-900/30 p-2 rounded">
+                        <div className="text-red-400 text-xs sm:text-[10px] bg-red-900/10 border border-red-900/30 p-3 sm:p-2 rounded-lg">
                             {error}
                         </div>
                     )}
@@ -343,7 +403,7 @@ export default function Login() {
                     <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full bg-white text-black py-3 rounded-sm uppercase text-[10px] font-bold tracking-widest hover:bg-yellow-600 hover:text-white transition-all duration-500 disabled:opacity-50"
+                    className="w-full bg-white text-black py-3 sm:py-3 rounded-lg uppercase text-xs sm:text-[10px] font-bold tracking-widest hover:bg-yellow-600 hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                     {isLoading ? "Authenticating..." : "Unlock Vault"}
                     </button>
@@ -357,43 +417,46 @@ export default function Login() {
                     animate={{ opacity: 1, x: 0 }} 
                     exit={{ opacity: 0, x: -10 }}
                     onSubmit={confirmationResult ? handleVerifyOtp : handleSendOtp} 
-                    className="space-y-5"
+                    className="space-y-4 sm:space-y-5"
                 >
                     {!confirmationResult ? (
                         // Step 1: Phone Input
-                        <div className="group relative">
-                            <Phone className="absolute left-0 top-2.5 text-gray-500 w-4 h-4 transition-colors group-focus-within:text-yellow-600" />
-                            <div className="flex items-center w-full border-b border-gray-800 focus-within:border-yellow-600 transition-colors">
-                                <span className="pl-8 py-2 text-sm text-gray-400 mr-2">+91</span>
+                        <div className="group">
+                            <div className="flex items-center w-full bg-gray-900/50 border border-gray-800 rounded-lg focus-within:border-yellow-600 focus-within:ring-1 focus-within:ring-yellow-600/20 transition-all">
+                                <div className="pl-4 pr-2 py-3 text-sm text-gray-400 flex items-center">
+                                    <Phone className="w-4 h-4 mr-2" />
+                                    +91
+                                </div>
                                 <input
                                     type="tel"
                                     placeholder="Mobile Number"
                                     value={phone}
                                     onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                                     required
-                                    className="flex-1 py-2 bg-transparent text-sm text-white placeholder-gray-600 focus:outline-none"
+                                    className="flex-1 py-3 bg-transparent text-sm sm:text-base text-white placeholder-gray-500 focus:outline-none"
                                 />
                             </div>
                             {/* REQUIRED for Firebase - Must exist when useEffect runs */}
-                            <div id="recaptcha-container"></div>
+                            <div id="recaptcha-container" className="hidden"></div>
                         </div>
                     ) : (
                         // Step 2: OTP Input
                         <div className="group relative">
-                            <Smartphone className="absolute left-0 top-2.5 text-gray-500 w-4 h-4 transition-colors group-focus-within:text-yellow-600" />
+                            <Smartphone className="absolute left-3 top-3 text-gray-500 w-4 h-4 transition-colors group-focus-within:text-yellow-600" />
                             <input
                                 type="text"
-                                placeholder="Enter Verification Code"
+                                placeholder="Enter 6-digit OTP"
                                 value={otp}
-                                onChange={(e) => setOtp(e.target.value)}
+                                onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                                 required
-                                className="w-full pl-8 pr-4 py-2 bg-transparent border-b border-gray-800 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-yellow-600 transition-colors"
+                                className="w-full pl-10 pr-4 py-3 bg-gray-900/50 border border-gray-800 text-sm sm:text-base text-white placeholder-gray-500 rounded-lg focus:outline-none focus:border-yellow-600 focus:ring-1 focus:ring-yellow-600/20 transition-all"
                             />
+                            <p className="text-xs text-gray-500 mt-2">Enter the 6-digit code sent to your phone</p>
                         </div>
                     )}
 
                     {error && (
-                        <div className="text-red-400 text-[10px] bg-red-900/10 border border-red-900/30 p-2 rounded">
+                        <div className="text-red-400 text-xs sm:text-[10px] bg-red-900/10 border border-red-900/30 p-3 sm:p-2 rounded-lg">
                             {error}
                         </div>
                     )}
@@ -401,36 +464,36 @@ export default function Login() {
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full bg-white text-black py-3 rounded-sm uppercase text-[10px] font-bold tracking-widest hover:bg-yellow-600 hover:text-white transition-all duration-500 disabled:opacity-50"
+                        className="w-full bg-white text-black py-3 sm:py-3 rounded-lg uppercase text-xs sm:text-[10px] font-bold tracking-widest hover:bg-yellow-600 hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {isLoading ? "Processing..." : (confirmationResult ? "Verify & Access" : "Send Verification Code")}
+                        {isLoading ? "Processing..." : (confirmationResult ? "Verify & Access" : "Send OTP")}
                     </button>
                 </motion.form>
             )}
           </AnimatePresence>
 
           {/* Divider */}
-          <div className="relative my-5 text-center">
+          <div className="relative my-6 text-center">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-800"></div>
             </div>
-            <span className="relative bg-[#050505] px-2 text-[10px] text-gray-500 uppercase tracking-widest">or</span>
+            <span className="relative bg-black/80 px-3 text-xs text-gray-500 uppercase tracking-widest">or</span>
           </div>
 
           {/* GOOGLE BUTTON */}
           <button
             onClick={() => googleLogin()}
-            className="w-full flex items-center justify-center gap-3 py-3 rounded-sm border border-gray-800 bg-transparent text-gray-300 hover:border-yellow-600 hover:text-white transition-all duration-300 group"
+            className="w-full flex items-center justify-center gap-3 py-3 rounded-lg border border-gray-800 bg-gray-900/50 text-gray-300 hover:border-yellow-600 hover:text-white hover:bg-gray-800/30 transition-all duration-300 group"
           >
             <div className="opacity-80 group-hover:opacity-100 transition-opacity grayscale group-hover:grayscale-0">
                <GoogleIcon />
             </div>
-            <span className="uppercase text-[10px] font-bold tracking-widest">
+            <span className="uppercase text-xs sm:text-[10px] font-bold tracking-widest">
               Continue with Google
             </span>
           </button>
 
-          <p className="mt-5 text-center text-xs text-gray-400">
+          <p className="mt-6 text-center text-xs sm:text-sm text-gray-400">
             Not a member?{" "}
             <Link
               to="/signup"
@@ -439,8 +502,15 @@ export default function Login() {
               Request Access
             </Link>
           </p>
+
+          {/* Mobile Footer */}
+          <div className="mt-8 pt-6 border-t border-gray-900 text-center lg:hidden">
+            <p className="text-[10px] text-gray-600 uppercase tracking-widest">
+              © 2024 Horologie. All Rights Reserved
+            </p>
+          </div>
         </motion.div>
       </div>
     </div>
   );
-} 
+}
