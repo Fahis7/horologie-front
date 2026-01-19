@@ -103,7 +103,7 @@ function Home() {
 
       <div className="text-gray-800 font-serif">
         
-        {/* --- HERO SECTION --- */}
+        {/* --- HERO SECTION - RESPONSIVE --- */}
         <section className="h-screen flex items-center justify-center relative overflow-hidden bg-black">
           <div className="absolute inset-0 z-0">
             <video
@@ -122,29 +122,29 @@ function Home() {
           </div>
 
           <motion.div 
-            className="relative z-10 p-8 max-w-4xl text-center will-change-transform" // Optimized for GPU
+            className="relative z-10 px-4 sm:p-8 max-w-4xl text-center will-change-transform w-full"
             style={{ y: heroTextY, opacity: heroOpacity }}
             initial="hidden"
             animate="visible"
             variants={containerVariants}
           >
-            <motion.h1 className="text-5xl sm:text-6xl lg:text-7xl font-light tracking-wider mb-8 leading-none text-white drop-shadow-2xl" variants={fadeInUp}>
-              <motion.span className="block font-playfair italic text-gold-500">
+            <motion.h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light tracking-wider mb-6 md:mb-8 leading-tight text-white drop-shadow-2xl" variants={fadeInUp}>
+              <motion.span className="block font-playfair italic text-gold-500 text-3xl sm:text-4xl md:text-5xl">
                 Horological
               </motion.span>
-              <motion.span className="block font-thin mt-2 uppercase tracking-[0.2em] text-8xl sm:text-4xl">
+              <motion.span className="block font-thin mt-2 uppercase tracking-[0.15em] sm:tracking-[0.2em] text-4xl sm:text-5xl md:text-6xl lg:text-8xl">
                 Mastery
               </motion.span>
             </motion.h1>
             
-            <motion.p className="text-xl mb-12 text-gray-100 font-extralight tracking-widest leading-relaxed max-w-2xl mx-auto mix-blend-overlay" variants={fadeInUp}>
+            <motion.p className="text-base sm:text-lg md:text-xl mb-8 md:mb-12 text-gray-100 font-extralight tracking-wider sm:tracking-widest leading-relaxed max-w-2xl mx-auto px-2 sm:px-0 mix-blend-overlay" variants={fadeInUp}>
               Where centuries of craftsmanship meet timeless elegance. Each tick echoes the pinnacle of human achievement.
             </motion.p>
             
-            <motion.div className="flex justify-center" variants={fadeInUp}>
+            <motion.div className="flex justify-center px-2 sm:px-0" variants={fadeInUp}>
               <MagneticButton 
                 to="/products"
-                className="bg-white/10 backdrop-blur-sm border border-white/40 text-white px-10 py-4 hover:bg-white hover:text-black transition-all duration-500 text-sm font-bold tracking-[0.2em] uppercase"
+                className="bg-white/10 backdrop-blur-sm border border-white/40 text-white px-6 sm:px-8 md:px-10 py-3 md:py-4 hover:bg-white hover:text-black transition-all duration-500 text-xs sm:text-sm font-bold tracking-[0.15em] sm:tracking-[0.2em] uppercase w-full sm:w-auto text-center"
               >
                 Explore Collections
               </MagneticButton>
@@ -152,7 +152,7 @@ function Home() {
           </motion.div>
 
           <motion.div
-            className="absolute bottom-10 left-1/2 transform -translate-x-1/2 text-white/50 text-xs tracking-[0.3em] uppercase"
+            className="absolute bottom-10 left-1/2 transform -translate-x-1/2 text-white/50 text-xs tracking-[0.3em] uppercase hidden sm:block"
             animate={{ y: [0, 10, 0], opacity: [0.5, 1, 0.5] }}
             transition={{ duration: 2, repeat: Infinity }}
           >
@@ -160,25 +160,25 @@ function Home() {
           </motion.div>
         </section>
 
-        {/* --- FEATURED COLLECTION --- */}
-        <section id="featured" className="py-32 bg-[#f8f5f0] overflow-hidden">
-          <div className="max-w-7xl mx-auto px-8">
+        {/* --- FEATURED COLLECTION - RESPONSIVE WITH CLICKABLE CARDS --- */}
+        <section id="featured" className="py-16 sm:py-24 md:py-32 bg-[#f8f5f0] overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div 
-              className="text-center mb-24"
+              className="text-center mb-12 sm:mb-20 md:mb-24"
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
             >
-              <h2 className="text-4xl font-light mb-4 text-gray-800 tracking-[0.2em] uppercase">
-                <span className="border-b border-gold-500 pb-4">Signature Timepieces</span>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-4 text-gray-800 tracking-[0.1em] sm:tracking-[0.15em] md:tracking-[0.2em] uppercase">
+                <span className="border-b border-gold-500 pb-2 sm:pb-3 md:pb-4 inline-block">Signature Timepieces</span>
               </h2>
-              <p className="text-gray-500 font-serif italic mt-6 text-lg">
+              <p className="text-gray-500 font-serif italic mt-4 sm:mt-6 text-sm sm:text-base md:text-lg px-2 sm:px-0">
                 "Precision is not just a metric, it is an emotion."
               </p>
             </motion.div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 md:gap-10 lg:gap-12">
               {[
                 {
                   name: "Patek Philippe Grandmaster",
@@ -201,87 +201,134 @@ function Home() {
               ].map((watch, index) => (
                 <motion.div 
                   key={index} 
-                  className="group relative cursor-pointer"
+                  className="group relative"
                   initial={{ opacity: 0, y: 100 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.8, delay: index * 0.2 }}
                 >
-                  <div className="relative overflow-hidden h-[500px] w-full bg-gray-200">
-                    <motion.img
-                      src={watch.image}
-                      alt={watch.name}
-                      className="w-full h-full object-cover transition-transform duration-[1.5s] ease-out will-change-transform" // Optimized
-                      whileHover={{ scale: 1.05 }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500"></div>
-                    
-                    <div className="absolute bottom-8 left-8 text-white z-10 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                        <p className="text-xs tracking-[0.2em] text-gold-400 mb-2">{watch.ref}</p>
-                        <h3 className="text-2xl font-serif leading-tight mb-2">{watch.name}</h3>
-                        <div className="h-[1px] w-0 group-hover:w-full bg-white/50 transition-all duration-700 ease-out mb-4"></div>
+                  {/* Entire card is clickable on all devices */}
+                  <Link 
+                    to="/products" 
+                    className="block cursor-pointer"
+                  >
+                    <div className="relative overflow-hidden h-[300px] sm:h-[350px] md:h-[400px] lg:h-[500px] w-full bg-gray-200">
+                      <motion.img
+                        src={watch.image}
+                        alt={watch.name}
+                        className="w-full h-full object-cover transition-transform duration-[1.5s] ease-out will-change-transform group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500"></div>
+                      
+                      <div className="absolute bottom-4 sm:bottom-6 md:bottom-8 left-4 sm:left-6 md:left-8 text-white z-10 translate-y-2 sm:translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                        <p className="text-[10px] sm:text-xs tracking-[0.15em] sm:tracking-[0.2em] text-gold-400 mb-1 sm:mb-2">{watch.ref}</p>
+                        <h3 className="text-lg sm:text-xl md:text-2xl font-serif leading-tight mb-1 sm:mb-2">{watch.name}</h3>
+                        <div className="h-[1px] w-0 group-hover:w-full bg-white/50 transition-all duration-700 ease-out mb-2 sm:mb-3 md:mb-4"></div>
                         <p className="text-sm font-light opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">{watch.price}</p>
+                        
+                        {/* View Details Button - Hidden on mobile, shown on hover for desktop */}
+                        <div className="mt-3 sm:mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-200">
+                          <span className="inline-flex items-center gap-2 text-xs sm:text-sm tracking-[0.1em] uppercase border border-white/40 px-3 sm:px-4 py-1.5 sm:py-2 hover:bg-white hover:text-black transition-colors duration-300">
+                            View Details
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            </svg>
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Mobile Tap Indicator */}
+                      <div className="absolute top-4 right-4 sm:hidden">
+                        <div className="bg-black/40 backdrop-blur-sm rounded-full p-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                          </svg>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  </Link>
                 </motion.div>
               ))}
             </div>
+
+            {/* View All Button */}
+            <motion.div 
+              className="mt-12 text-center"
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.5 }}
+            >
+              <Link 
+                to="/products"
+                className="inline-block bg-transparent border border-gray-800 text-gray-800 px-6 sm:px-8 py-3 sm:py-4 hover:bg-gray-800 hover:text-white transition-all duration-300 text-sm tracking-[0.1em] uppercase group"
+              >
+                <span className="flex items-center justify-center gap-2">
+                  View All Collections
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </span>
+              </Link>
+            </motion.div>
           </div>
         </section>
 
-        {/* --- ANATOMY OF TIME --- */}
+        {/* --- ANATOMY OF TIME - RESPONSIVE --- */}
         <section className="py-0 relative bg-black text-white overflow-hidden">
             <div className="absolute inset-0 opacity-40">
                 <img 
                     src="https://images.unsplash.com/photo-1614164185128-e4ec99c436d7?q=80&w=2574&auto=format&fit=crop" 
                     alt="Watch Movement Macro" 
                     className="w-full h-full object-cover grayscale"
-                    loading="lazy" // Optimized
+                    loading="lazy"
                 />
             </div>
-            <div className="relative z-10 max-w-7xl mx-auto px-8 py-40 flex flex-col md:flex-row items-center justify-between">
+            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 md:py-40 flex flex-col md:flex-row items-center justify-between">
                 <motion.div 
                     initial={{ opacity: 0, x: -50 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     transition={{ duration: 1 }}
-                    className="md:w-1/2"
+                    className="md:w-1/2 mb-8 sm:mb-12 md:mb-0"
                 >
-                    <h2 className="text-5xl md:text-7xl font-serif mb-6">The Anatomy <br/><span className="text-gray-500 italic">of Time</span></h2>
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-serif mb-4 md:mb-6 leading-tight">
+                      The Anatomy <br/><span className="text-gray-500 italic text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl">of Time</span>
+                    </h2>
                 </motion.div>
                 <motion.div 
                     initial={{ opacity: 0, x: 50 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     transition={{ duration: 1, delay: 0.3 }}
-                    className="md:w-1/3 backdrop-blur-md bg-white/5 p-8 border border-white/10"
+                    className="md:w-1/3 backdrop-blur-md bg-white/5 p-6 sm:p-8 border border-white/10 w-full md:w-auto"
                 >
-                    <p className="text-gray-300 font-light leading-loose">
+                    <p className="text-gray-300 font-light leading-relaxed md:leading-loose text-sm sm:text-base">
                         True luxury is found in the unseen. Behind every dial lies a world of microscopic precision—gears, springs, and escapements working in a symphony of mechanics.
                     </p>
-                    <Link to="/products" className="inline-block mt-8 text-xs tracking-[0.2em] border-b border-white pb-1 hover:text-gold-400 hover:border-gold-400 transition-colors">
+                    <Link to="/products" className="inline-block mt-4 sm:mt-6 md:mt-8 text-xs tracking-[0.15em] sm:tracking-[0.2em] border-b border-white pb-1 hover:text-gold-400 hover:border-gold-400 transition-colors">
                         DISCOVER OUR CRAFTSMANSHIP
                     </Link>
                 </motion.div>
             </div>
         </section>
 
-        {/* --- HERITAGE SECTION (Fixed Signature) --- */}
-        <section className="py-32 bg-white overflow-hidden">
-          <div className="max-w-7xl mx-auto px-8">
-            <div className="flex flex-col md:flex-row items-center gap-16">
+        {/* --- HERITAGE SECTION - RESPONSIVE --- */}
+        <section className="py-16 sm:py-24 md:py-32 bg-white overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col md:flex-row items-center gap-8 sm:gap-12 md:gap-16">
               
               <motion.div 
-                className="md:w-1/2"
+                className="md:w-1/2 order-2 md:order-1"
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true }}
                 variants={slideInFromLeft}
               >
-                <h2 className="text-xs text-gold-600 tracking-[0.3em] uppercase mb-4 font-bold">Est. 1924</h2>
-                <h3 className="text-4xl md:text-5xl font-serif text-gray-900 mb-8 leading-tight">
+                <h2 className="text-xs text-gold-600 tracking-[0.2em] sm:tracking-[0.25em] md:tracking-[0.3em] uppercase mb-3 sm:mb-4 font-bold">Est. 1924</h2>
+                <h3 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-serif text-gray-900 mb-6 md:mb-8 leading-tight">
                   A Century of <br/> Timeless Tradition
                 </h3>
                 
-                <div className="space-y-6 text-gray-600 font-light leading-relaxed text-lg">
+                <div className="space-y-4 sm:space-y-5 md:space-y-6 text-gray-600 font-light leading-relaxed text-sm sm:text-base md:text-lg">
                   <p>
                     Since 1924, we have been custodians of horological excellence.
                     Our family has built relationships with the finest watchmakers, 
@@ -293,17 +340,17 @@ function Home() {
                   </p>
                 </div>
 
-                {/* ✅ FIXED: Use a Cursive Font for Signature, NOT an image */}
-                <div className="mt-12 opacity-80">
-                   <h3 className="font-signature text-xl text-gray-800">
+                {/* ✅ FIXED: Use a Cursive Font for Signature */}
+                <div className="mt-8 sm:mt-10 md:mt-12 opacity-80">
+                   <h3 className="font-signature text-lg sm:text-xl md:text-2xl text-gray-800">
                      Alexandre Gauthier
                    </h3>
-                   <p className="text-[10px] uppercase tracking-widest text-gray-400 mt-2">Founder & Master Watchmaker</p>
+                   <p className="text-[10px] sm:text-xs uppercase tracking-widest text-gray-400 mt-1 sm:mt-2">Founder & Master Watchmaker</p>
                 </div>
               </motion.div>
               
               <motion.div 
-                className="md:w-1/2 relative p-4"
+                className="md:w-1/2 relative p-4 order-1 md:order-2"
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true }}
@@ -319,7 +366,7 @@ function Home() {
                 </div>
 
                 <motion.div 
-                    className="absolute inset-0 border border-gray-900 z-0 translate-x-4 translate-y-4"
+                    className="absolute inset-0 border border-gray-900 z-0 translate-x-2 sm:translate-x-3 md:translate-x-4 translate-y-2 sm:translate-y-3 md:translate-y-4"
                     initial={{ pathLength: 0, opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     transition={{ duration: 1.5, delay: 0.5 }}
