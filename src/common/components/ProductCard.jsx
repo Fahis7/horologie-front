@@ -61,7 +61,7 @@ const ProductCard = ({ product }) => {
   };
 
   return (
-    <div className="group relative w-full">
+    <div className="group relative w-full h-full">
       <Link to={`/product/${product.id}`} className="block h-full">
         <div
           className="relative bg-white rounded-xl overflow-hidden transition-all duration-500 group-hover:shadow-2xl group-hover:scale-[1.02] h-full flex flex-col"
@@ -103,8 +103,8 @@ const ProductCard = ({ product }) => {
             </button>
           </div>
 
-          {/* Product Image Container */}
-          <div className="relative w-full pb-[130.33%] bg-gray-100 overflow-hidden">
+          {/* Product Image Container - Fixed Height */}
+          <div className="relative w-full h-84 bg-gray-100 overflow-hidden">
             {/* Loader */}
             <div className="absolute inset-0 flex items-center justify-center">
               {!imageLoaded && (
@@ -128,62 +128,62 @@ const ProductCard = ({ product }) => {
             <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           </div>
 
-          {/* Product Info */}
-          <div className="p-5 flex-grow flex flex-col justify-between">
-            <div>
-              {/* Brand */}
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold tracking-[0.2em] text-gray-500 uppercase">
-                  {product.brand}
-                </span>
-                {product.rating && (
-                  <div className="flex items-center gap-1">
-                    <div className="flex">
-                      {[...Array(5)].map((_, i) => (
-                        <svg
-                          key={i}
-                          className={`w-3 h-3 ${
-                            i < Math.floor(product.rating)
-                              ? "text-yellow-400 fill-current"
-                              : "text-gray-300"
-                          }`}
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      ))}
-                    </div>
-                    <span className="text-xs text-gray-500">
-                      {product.rating}
-                    </span>
+          {/* Product Info - Fixed Height Container */}
+          <div className="p-5 flex-grow flex flex-col min-h-[180px]">
+            {/* Brand & Rating - Fixed Height */}
+            <div className="flex items-center justify-between mb-2 min-h-[24px]">
+              <span className="text-xs font-semibold tracking-[0.2em] text-gray-500 uppercase truncate max-w-[70%]">
+                {product.brand || "BRAND"}
+              </span>
+              {product.rating && (
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <svg
+                        key={i}
+                        className={`w-3 h-3 ${
+                          i < Math.floor(product.rating)
+                            ? "text-yellow-400 fill-current"
+                            : "text-gray-300"
+                        }`}
+                        viewBox="0 0 20 20"
+                      >
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    ))}
                   </div>
-                )}
-              </div>
-
-              {/* Product Name */}
-              <h3 className="text-lg font-serif font-normal text-gray-900 leading-snug tracking-tight line-clamp-2 min-h-[3.5rem]">
-                {product.name}
-              </h3>
+                  <span className="text-xs text-gray-500">
+                    {product.rating}
+                  </span>
+                </div>
+              )}
             </div>
 
-            {/* Price & CTA */}
-            <div className="flex items-center justify-between pt-3 border-t border-gray-100 mt-auto">
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-serif font-light text-gray-900">
-                  ${product.price?.toLocaleString()}
-                </span>
-                {product.originalPrice && (
-                  <span className="text-sm text-gray-400 line-through">
-                    ${product.originalPrice?.toLocaleString()}
-                  </span>
-                )}
-              </div>
+            {/* Product Name - Fixed Height with Clamp */}
+            <h3 className="text-lg font-serif font-normal text-gray-900 leading-snug tracking-tight line-clamp-2 mb-4 h-14 overflow-hidden">
+              {product.name || "Product Name"}
+            </h3>
 
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500 group-hover:text-black transition-colors duration-300">
-                  View details
-                </span>
-                <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-black group-hover:translate-x-1 transition-all duration-300" />
+            {/* Price & CTA - Fixed at Bottom */}
+            <div className="mt-auto pt-4 border-t border-gray-100">
+              <div className="flex items-center justify-between">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl font-serif font-light text-gray-900">
+                    ${(product.price || 0).toLocaleString()}
+                  </span>
+                  {product.originalPrice && (
+                    <span className="text-sm text-gray-400 line-through">
+                      ${product.originalPrice.toLocaleString()}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-500 group-hover:text-black transition-colors duration-300 whitespace-nowrap">
+                    View details
+                  </span>
+                  <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-black group-hover:translate-x-1 transition-all duration-300" />
+                </div>
               </div>
             </div>
           </div>
