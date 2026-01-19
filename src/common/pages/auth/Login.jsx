@@ -236,281 +236,361 @@ export default function Login() {
     setError("");
   };
 
-  return (
-    <div className="min-h-screen w-full bg-[#050505] text-white flex flex-col lg:flex-row overflow-hidden relative font-sans selection:bg-yellow-900 selection:text-white">
-      <GrainOverlay />
-
-      {/* TOP BAR FOR MOBILE */}
-      <div className="lg:hidden w-full p-4 flex items-center justify-between border-b border-gray-900 z-30">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-full bg-yellow-500/10 border border-yellow-500/20">
-            <Watch className="w-5 h-5 text-yellow-500" />
-          </div>
-          <div>
-            <h1 className="text-lg font-serif text-white">Horologie.</h1>
-            <p className="text-yellow-500 text-[10px] tracking-[0.2em] uppercase">
-              Est. 1924
-            </p>
-          </div>
-        </div>
-        <Link 
-          to="/"
-          className="text-xs text-gray-400 hover:text-white transition-colors px-3 py-1.5 border border-gray-800 rounded-full"
+  // Shared form content for both mobile and desktop
+  const renderForm = () => (
+    <>
+      {/* TOGGLE SWITCH (Email vs Phone) */}
+      <div className="flex gap-1 mb-6 sm:mb-8 p-1 bg-gradient-to-b from-amber-950/20 to-amber-950/10 rounded-xl border border-amber-900/20 backdrop-blur-sm">
+        <button 
+          onClick={() => { 
+            setLoginMethod("email"); 
+            setError("");
+            setShowBackButton(false);
+          }}
+          className={`flex-1 py-2 sm:py-3 rounded-lg transition-all duration-300 text-sm ${loginMethod === "email" 
+            ? "bg-gradient-to-b from-amber-900/30 to-amber-950/30 text-amber-300 border border-amber-700/30" 
+            : "text-gray-400 hover:text-white hover:bg-white/5"}`}
         >
-          Back to Home
-        </Link>
-      </div>
-
-      {/* LEFT SIDE: VISUAL - Hidden on mobile, shown on desktop */}
-      <div className="hidden lg:flex lg:w-1/2 h-full relative overflow-hidden">
-        <div className="absolute inset-0 bg-black/40 z-10" />
-        <motion.img
-          initial={{ scale: 1.1 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 10, ease: "easeOut" }}
-          src="https://images.unsplash.com/photo-1614164185128-e4ec99c436d7?q=80&w=2574&auto=format&fit=crop"
-          alt="Watch Movement"
-          className="w-full h-full object-cover grayscale opacity-80"
-        />
-        <div className="absolute bottom-12 left-12 z-20">
-          <h1 className="text-3xl font-serif text-white mb-2">Horologie.</h1>
-          <p className="text-yellow-500 text-xs tracking-[0.3em] uppercase">
-            Est. 1924 • Geneva
-          </p>
-        </div>
-      </div>
-
-      {/* MOBILE BACKGROUND IMAGE */}
-      <div className="lg:hidden absolute inset-0 z-0 opacity-20">
-        <img
-          src="https://images.unsplash.com/photo-1614164185128-e4ec99c436d7?q=80&w=600&auto=format&fit=crop"
-          alt="Watch Movement"
-          className="w-full h-full object-cover grayscale"
-        />
-      </div>
-
-      {/* RIGHT SIDE: THE FORM */}
-      <div className="w-full lg:w-1/2 flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8 relative z-20">
-        
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="w-full max-w-md bg-black/80 backdrop-blur-sm border border-gray-900 rounded-2xl p-6 sm:p-8"
+          Email
+        </button>
+        <button 
+          onClick={() => { 
+            setLoginMethod("phone"); 
+            setError("");
+            setShowBackButton(false);
+          }}
+          className={`flex-1 py-2 sm:py-3 rounded-lg transition-all duration-300 text-sm ${loginMethod === "phone" 
+            ? "bg-gradient-to-b from-amber-900/30 to-amber-950/30 text-amber-300 border border-amber-700/30" 
+            : "text-gray-400 hover:text-white hover:bg-white/5"}`}
         >
-          {/* Back button for OTP verification */}
-          {showBackButton && (
-            <button
-              onClick={handleBackToPhoneInput}
-              className="flex items-center gap-2 text-xs text-gray-400 hover:text-white mb-6 transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to phone input
-            </button>
-          )}
+          Mobile
+        </button>
+      </div>
 
-          <div className="mb-6 text-center">
-            <h2 className="text-2xl sm:text-3xl font-serif text-white mb-1">Access Vault</h2>
-            <p className="text-gray-500 text-xs sm:text-sm font-light">Select authentication method</p>
-          </div>
-
-          {/* TOGGLE SWITCH (Email vs Phone) - Better mobile layout */}
-          <div className="flex gap-3 sm:gap-4 mb-6 sm:mb-8 border-b border-gray-800 pb-2">
-            <button 
-                onClick={() => { 
-                  setLoginMethod("email"); 
-                  setError("");
-                  setShowBackButton(false);
-                }}
-                className={`flex-1 text-xs sm:text-sm uppercase tracking-wider pb-2 transition-colors text-center ${loginMethod === "email" ? "text-yellow-500 border-b-2 border-yellow-500" : "text-gray-500 hover:text-white"}`}
-            >
-                <span className="hidden sm:inline">Email</span>
-                <span className="sm:hidden">Email</span>
-            </button>
-            <button 
-                onClick={() => { 
-                  setLoginMethod("phone"); 
-                  setError("");
-                  setShowBackButton(false);
-                }}
-                className={`flex-1 text-xs sm:text-sm uppercase tracking-wider pb-2 transition-colors text-center ${loginMethod === "phone" ? "text-yellow-500 border-b-2 border-yellow-500" : "text-gray-500 hover:text-white"}`}
-            >
-                <span className="hidden sm:inline">Mobile</span>
-                <span className="sm:hidden">Phone</span>
-            </button>
-          </div>
-
-          <AnimatePresence mode="wait">
-            {loginMethod === "email" ? (
-                // === EMAIL LOGIN FORM ===
-                <motion.form 
-                    key="email-form"
-                    initial={{ opacity: 0, x: -10 }} 
-                    animate={{ opacity: 1, x: 0 }} 
-                    exit={{ opacity: 0, x: 10 }}
-                    onSubmit={handleEmailLogin} 
-                    className="space-y-4 sm:space-y-5"
-                >
-                    <div className="group relative">
-                    <Mail className="absolute left-3 top-3 sm:top-2.5 text-gray-500 w-4 h-4 sm:w-4 sm:h-4 transition-colors group-focus-within:text-yellow-600" />
-                    <input
-                        name="email"
-                        type="email"
-                        placeholder="Email Address"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                        className="w-full pl-10 sm:pl-8 pr-4 py-3 sm:py-2 bg-gray-900/50 border border-gray-800 text-sm sm:text-base text-white placeholder-gray-500 rounded-lg focus:outline-none focus:border-yellow-600 focus:ring-1 focus:ring-yellow-600/20 transition-all"
-                    />
-                    </div>
-
-                    <div className="group relative">
-                    <Lock className="absolute left-3 top-3 sm:top-2.5 text-gray-500 w-4 h-4 sm:w-4 sm:h-4 transition-colors group-focus-within:text-yellow-600" />
-                    <input
-                        name="password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        required
-                        className="w-full pl-10 sm:pl-8 pr-12 py-3 sm:py-2 bg-gray-900/50 border border-gray-800 text-sm sm:text-base text-white placeholder-gray-500 rounded-lg focus:outline-none focus:border-yellow-600 focus:ring-1 focus:ring-yellow-600/20 transition-all"
-                    />
-                    <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-3 sm:top-2.5 text-gray-500 hover:text-white transition-colors p-1"
-                    >
-                        {showPassword ? <EyeOff size={18} className="sm:w-4 sm:h-4" /> : <Eye size={18} className="sm:w-4 sm:h-4" />}
-                    </button>
-                    </div>
-
-                    {/* Forgot Password Link */}
-                    <div className="flex justify-end -mt-1">
-                      <Link 
-                        to="/forgot-password" 
-                        className="text-xs sm:text-[10px] text-gray-500 hover:text-yellow-500 transition-colors tracking-wide uppercase"
-                      >
-                        Forgot Password?
-                      </Link>
-                    </div>
-
-                    {error && (
-                        <div className="text-red-400 text-xs sm:text-[10px] bg-red-900/10 border border-red-900/30 p-3 sm:p-2 rounded-lg">
-                            {error}
-                        </div>
-                    )}
-
-                    <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full bg-white text-black py-3 sm:py-3 rounded-lg uppercase text-xs sm:text-[10px] font-bold tracking-widest hover:bg-yellow-600 hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                    {isLoading ? "Authenticating..." : "Unlock Vault"}
-                    </button>
-                </motion.form>
-
-            ) : (
-                // === PHONE / OTP LOGIN FORM ===
-                <motion.form 
-                    key="phone-form"
-                    initial={{ opacity: 0, x: 10 }} 
-                    animate={{ opacity: 1, x: 0 }} 
-                    exit={{ opacity: 0, x: -10 }}
-                    onSubmit={confirmationResult ? handleVerifyOtp : handleSendOtp} 
-                    className="space-y-4 sm:space-y-5"
-                >
-                    {!confirmationResult ? (
-                        // Step 1: Phone Input
-                        <div className="group">
-                            <div className="flex items-center w-full bg-gray-900/50 border border-gray-800 rounded-lg focus-within:border-yellow-600 focus-within:ring-1 focus-within:ring-yellow-600/20 transition-all">
-                                <div className="pl-4 pr-2 py-3 text-sm text-gray-400 flex items-center">
-                                    <Phone className="w-4 h-4 mr-2" />
-                                    +91
-                                </div>
-                                <input
-                                    type="tel"
-                                    placeholder="Mobile Number"
-                                    value={phone}
-                                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                                    required
-                                    className="flex-1 py-3 bg-transparent text-sm sm:text-base text-white placeholder-gray-500 focus:outline-none"
-                                />
-                            </div>
-                            {/* REQUIRED for Firebase - Must exist when useEffect runs */}
-                            <div id="recaptcha-container" className="hidden"></div>
-                        </div>
-                    ) : (
-                        // Step 2: OTP Input
-                        <div className="group relative">
-                            <Smartphone className="absolute left-3 top-3 text-gray-500 w-4 h-4 transition-colors group-focus-within:text-yellow-600" />
-                            <input
-                                type="text"
-                                placeholder="Enter 6-digit OTP"
-                                value={otp}
-                                onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                                required
-                                className="w-full pl-10 pr-4 py-3 bg-gray-900/50 border border-gray-800 text-sm sm:text-base text-white placeholder-gray-500 rounded-lg focus:outline-none focus:border-yellow-600 focus:ring-1 focus:ring-yellow-600/20 transition-all"
-                            />
-                            <p className="text-xs text-gray-500 mt-2">Enter the 6-digit code sent to your phone</p>
-                        </div>
-                    )}
-
-                    {error && (
-                        <div className="text-red-400 text-xs sm:text-[10px] bg-red-900/10 border border-red-900/30 p-3 sm:p-2 rounded-lg">
-                            {error}
-                        </div>
-                    )}
-
-                    <button
-                        type="submit"
-                        disabled={isLoading}
-                        className="w-full bg-white text-black py-3 sm:py-3 rounded-lg uppercase text-xs sm:text-[10px] font-bold tracking-widest hover:bg-yellow-600 hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {isLoading ? "Processing..." : (confirmationResult ? "Verify & Access" : "Send OTP")}
-                    </button>
-                </motion.form>
-            )}
-          </AnimatePresence>
-
-          {/* Divider */}
-          <div className="relative my-6 text-center">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-800"></div>
-            </div>
-            <span className="relative bg-black/80 px-3 text-xs text-gray-500 uppercase tracking-widest">or</span>
-          </div>
-
-          {/* GOOGLE BUTTON */}
-          <button
-            onClick={() => googleLogin()}
-            className="w-full flex items-center justify-center gap-3 py-3 rounded-lg border border-gray-800 bg-gray-900/50 text-gray-300 hover:border-yellow-600 hover:text-white hover:bg-gray-800/30 transition-all duration-300 group"
+      <AnimatePresence mode="wait">
+        {loginMethod === "email" ? (
+          // === EMAIL LOGIN FORM ===
+          <motion.form 
+            key="email-form"
+            initial={{ opacity: 0, x: -10 }} 
+            animate={{ opacity: 1, x: 0 }} 
+            exit={{ opacity: 0, x: 10 }}
+            onSubmit={handleEmailLogin} 
+            className="space-y-4 sm:space-y-5"
           >
-            <div className="opacity-80 group-hover:opacity-100 transition-opacity grayscale group-hover:grayscale-0">
-               <GoogleIcon />
+            <div className="group relative">
+              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4 sm:w-4 sm:h-4 transition-colors group-focus-within:text-amber-600" />
+              <input
+                name="email"
+                type="email"
+                placeholder="Email Address"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                className="w-full pl-10 sm:pl-10 pr-4 py-3 sm:py-3 bg-gray-900/50 border border-gray-800 text-sm sm:text-base text-white placeholder-gray-500 rounded-lg focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600/20 transition-all"
+              />
             </div>
-            <span className="uppercase text-xs sm:text-[10px] font-bold tracking-widest">
-              Continue with Google
-            </span>
-          </button>
 
-          <p className="mt-6 text-center text-xs sm:text-sm text-gray-400">
-            Not a member?{" "}
-            <Link
-              to="/signup"
-              className="text-gray-200 hover:text-yellow-500 transition-colors border-b border-transparent hover:border-yellow-500 pb-0.5"
+            <div className="group relative">
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4 sm:w-4 sm:h-4 transition-colors group-focus-within:text-amber-600" />
+              <input
+                name="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                className="w-full pl-10 sm:pl-10 pr-12 py-3 sm:py-3 bg-gray-900/50 border border-gray-800 text-sm sm:text-base text-white placeholder-gray-500 rounded-lg focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600/20 transition-all"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-white transition-colors p-1"
+              >
+                {showPassword ? <EyeOff size={18} className="sm:w-4 sm:h-4" /> : <Eye size={18} className="sm:w-4 sm:h-4" />}
+              </button>
+            </div>
+
+            {/* Forgot Password Link */}
+            <div className="flex justify-end -mt-1">
+              <Link 
+                to="/forgot-password" 
+                className="text-xs sm:text-xs text-gray-500 hover:text-amber-500 transition-colors tracking-wide uppercase"
+              >
+                Forgot Password?
+              </Link>
+            </div>
+
+            {error && (
+              <div className="text-red-400 text-xs sm:text-xs bg-red-900/10 border border-red-900/30 p-3 sm:p-2 rounded-lg">
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-white text-black py-3 sm:py-3 rounded-lg uppercase text-xs sm:text-xs font-bold tracking-widest hover:bg-amber-600 hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Request Access
-            </Link>
-          </p>
+              {isLoading ? "Authenticating..." : "Unlock Access"}
+            </button>
+          </motion.form>
+        ) : (
+          // === PHONE / OTP LOGIN FORM ===
+          <motion.form 
+            key="phone-form"
+            initial={{ opacity: 0, x: 10 }} 
+            animate={{ opacity: 1, x: 0 }} 
+            exit={{ opacity: 0, x: -10 }}
+            onSubmit={confirmationResult ? handleVerifyOtp : handleSendOtp} 
+            className="space-y-4 sm:space-y-5"
+          >
+            {!confirmationResult ? (
+              // Step 1: Phone Input
+              <div className="group">
+                <div className="flex items-center w-full bg-gray-900/50 border border-gray-800 rounded-lg focus-within:border-amber-600 focus-within:ring-1 focus-within:ring-amber-600/20 transition-all">
+                  <div className="pl-4 pr-2 py-3 text-sm text-gray-400 flex items-center">
+                    <Phone className="w-4 h-4 mr-2" />
+                    +91
+                  </div>
+                  <input
+                    type="tel"
+                    placeholder="Mobile Number"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                    required
+                    className="flex-1 py-3 bg-transparent text-sm sm:text-base text-white placeholder-gray-500 focus:outline-none"
+                  />
+                </div>
+                {/* REQUIRED for Firebase - Must exist when useEffect runs */}
+                <div id="recaptcha-container" className="hidden"></div>
+              </div>
+            ) : (
+              // Step 2: OTP Input
+              <div className="group relative">
+                <Smartphone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4 transition-colors group-focus-within:text-amber-600" />
+                <input
+                  type="text"
+                  placeholder="Enter 6-digit OTP"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  required
+                  className="w-full pl-10 pr-4 py-3 bg-gray-900/50 border border-gray-800 text-sm sm:text-base text-white placeholder-gray-500 rounded-lg focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600/20 transition-all"
+                />
+                <p className="text-xs text-gray-500 mt-2">Enter the 6-digit code sent to your phone</p>
+              </div>
+            )}
 
-          {/* Mobile Footer */}
-          <div className="mt-8 pt-6 border-t border-gray-900 text-center lg:hidden">
-            <p className="text-[10px] text-gray-600 uppercase tracking-widest">
-              © 2024 Horologie. All Rights Reserved
+            {error && (
+              <div className="text-red-400 text-xs sm:text-xs bg-red-900/10 border border-red-900/30 p-3 sm:p-2 rounded-lg">
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-white text-black py-3 sm:py-3 rounded-lg uppercase text-xs sm:text-xs font-bold tracking-widest hover:bg-amber-600 hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? "Processing..." : (confirmationResult ? "Verify & Access" : "Send OTP")}
+            </button>
+          </motion.form>
+        )}
+      </AnimatePresence>
+
+      {/* Divider */}
+      <div className="relative my-6 text-center">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-gray-800"></div>
+        </div>
+        <span className="relative bg-black/80 px-3 text-xs text-gray-500 uppercase tracking-widest">or</span>
+      </div>
+
+      {/* GOOGLE BUTTON */}
+      <button
+        onClick={() => googleLogin()}
+        className="w-full flex items-center justify-center gap-3 py-3 rounded-lg border border-gray-800 bg-gray-900/50 text-gray-300 hover:border-amber-600 hover:text-white hover:bg-gray-800/30 transition-all duration-300 group"
+      >
+        <div className="opacity-80 group-hover:opacity-100 transition-opacity grayscale group-hover:grayscale-0">
+          <GoogleIcon />
+        </div>
+        <span className="uppercase text-xs sm:text-xs font-bold tracking-widest">
+          Continue with Google
+        </span>
+      </button>
+
+      <p className="mt-6 text-center text-xs sm:text-sm text-gray-400">
+        Not a member?{" "}
+        <Link
+          to="/signup"
+          className="text-gray-200 hover:text-amber-500 transition-colors border-b border-transparent hover:border-amber-500 pb-0.5"
+        >
+          Request Access
+        </Link>
+      </p>
+    </>
+  );
+
+  return (
+    <>
+      {/* MOBILE VIEW */}
+      <div className="lg:hidden min-h-screen bg-[#050505] text-white flex flex-col overflow-hidden relative font-sans selection:bg-amber-900 selection:text-white">
+        <GrainOverlay />
+
+        {/* TOP BAR FOR MOBILE */}
+        <div className="w-full p-4 flex items-center justify-between border-b border-gray-900 z-30">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-full bg-amber-500/10 border border-amber-500/20">
+              <Watch className="w-5 h-5 text-amber-500" />
+            </div>
+            <div>
+              <h1 className="text-lg font-serif text-white">Horologie</h1>
+              <p className="text-amber-500 text-[10px] tracking-[0.2em] uppercase">
+                Est. 1924
+              </p>
+            </div>
+          </div>
+          <Link 
+            to="/"
+            className="text-xs text-gray-400 hover:text-white transition-colors px-3 py-1.5 border border-gray-800 rounded-full"
+          >
+            Home
+          </Link>
+        </div>
+
+        {/* Back button for OTP verification */}
+        {showBackButton && (
+          <button
+            onClick={handleBackToPhoneInput}
+            className="flex items-center gap-2 text-xs text-gray-400 hover:text-white px-4 pt-4 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to phone input
+          </button>
+        )}
+
+        {/* MOBILE FORM CONTENT */}
+        <div className="flex-1 flex items-center justify-center p-4 relative z-20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="w-full max-w-md"
+          >
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-serif text-white mb-1">Secure Access</h2>
+              <p className="text-gray-500 text-sm font-light">Welcome to our private collection</p>
+            </div>
+
+            <div className="bg-black/80 backdrop-blur-sm border border-gray-900 rounded-2xl p-6">
+              {renderForm()}
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Mobile Footer */}
+        <div className="mt-8 pt-6 border-t border-gray-900 text-center">
+          <p className="text-[10px] text-gray-600 uppercase tracking-widest">
+            © 2024 Horologie. All Rights Reserved
+          </p>
+        </div>
+      </div>
+
+      {/* DESKTOP VIEW */}
+      <div className="hidden lg:flex h-screen w-screen bg-gradient-to-br from-[#0a0a0a] via-[#111111] to-[#1a1a1a] text-white overflow-hidden relative font-serif selection:bg-amber-900/30 selection:text-amber-100">
+        <GrainOverlay />
+        
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Luxury Pattern Overlay */}
+          <div className="absolute inset-0 opacity-[0.03]" style={{
+            backgroundImage: `url("https://www.transparenttextures.com/patterns/diamond-upholstery.png")`,
+            backgroundSize: '300px'
+          }} />
+          
+          {/* Shimmer Effect */}
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-amber-500/5 via-transparent to-transparent rounded-full blur-3xl" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-l from-amber-400/5 via-transparent to-transparent rounded-full blur-3xl" />
+        </div>
+
+        {/* LEFT SIDE: LUXURY VISUAL */}
+        <div className="w-1/2 h-full relative overflow-hidden">
+          {/* Luxury Gradient Overlay */}
+          <div className="absolute inset-0 z-10 bg-gradient-to-t from-black via-black/70 to-transparent" />
+          <div className="absolute inset-0 z-10 bg-gradient-to-r from-black via-transparent to-transparent" />
+          
+          <motion.img
+            initial={{ scale: 1.2 }}
+            animate={{ scale: 1.05 }}
+            transition={{ duration: 20, ease: "easeOut" }}
+            src="https://images.unsplash.com/photo-1548169874-53e85f753f1e?q=80&w=2664&auto=format&fit=crop&ixlib=rb-4.0.3"
+            alt="Luxury Watch Collection"
+            className="w-full h-full object-cover"
+          />
+          
+          <div className="absolute bottom-16 left-16 z-20">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-8 h-px bg-gradient-to-r from-amber-500 to-transparent"></div>
+              <p className="text-amber-400 text-xs tracking-[0.4em] uppercase">
+                Est. 1924
+              </p>
+            </div>
+            <h1 className="text-5xl font-serif text-white mb-3 leading-tight">
+              Timeless<br />Elegance
+            </h1>
+            <p className="text-gray-300/80 text-sm max-w-md leading-relaxed">
+              Where centuries of horological mastery meet modern luxury. 
+              Each timepiece tells a story of precision and passion.
             </p>
           </div>
-        </motion.div>
+        </div>
+
+        {/* RIGHT SIDE: THE FORM */}
+        <div className="w-1/2 h-full flex items-center justify-center p-8 relative z-20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="w-full max-w-md"
+          >
+            <div className="relative">
+              {/* Luxury Decorative Elements */}
+              <div className="absolute -top-6 -left-6 w-12 h-12 border-t border-l border-amber-700/30"></div>
+              <div className="absolute -bottom-6 -right-6 w-12 h-12 border-b border-r border-amber-700/30"></div>
+              
+              <div className="backdrop-blur-xl bg-gradient-to-br from-black/80 via-[#0a0a0a]/90 to-[#111111]/90 border border-amber-900/20 rounded-2xl p-8 shadow-2xl shadow-black/40">
+                
+                {/* Back button for OTP verification */}
+                {showBackButton && (
+                  <button
+                    onClick={handleBackToPhoneInput}
+                    className="flex items-center gap-2 text-xs text-amber-300/60 hover:text-amber-300 mb-8 transition-colors group"
+                  >
+                    <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                    Return to phone verification
+                  </button>
+                )}
+
+                {/* Header */}
+                <div className="mb-10 text-center relative">
+                  <div className="inline-flex items-center justify-center gap-3 mb-4">
+                    <div className="w-5 h-5 text-amber-400">🔒</div>
+                    <h2 className="text-3xl font-serif text-white tracking-wide">Secure Access</h2>
+                  </div>
+                  <p className="text-gray-400/80 text-sm font-light tracking-wide">
+                    Welcome to our private collection
+                  </p>
+                  <div className="mt-6 flex justify-center">
+                    <div className="w-16 h-px bg-gradient-to-r from-transparent via-amber-500/50 to-transparent"></div>
+                  </div>
+                </div>
+
+                {renderForm()}
+              </div>
+            </div>
+          </motion.div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
