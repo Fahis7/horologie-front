@@ -31,7 +31,8 @@ const GoogleIcon = () => (
 );
 
 export default function Login() {
-  const { login } = useContext(AuthContext);
+  // ✅ FIX 1: Extract 'user' from context
+  const { login, user } = useContext(AuthContext);
   const navigate = useNavigate();
 
   // Standard Login States
@@ -49,6 +50,20 @@ export default function Login() {
 
   // Use a Ref to track if recaptcha is already rendered to avoid duplicate widgets
   const recaptchaVerifierRef = useRef(null);
+
+  // ✅ FIX 2: Auto-Redirect Listener
+  // This watches the 'user' state. As soon as it becomes active (logged in),
+  // it forces the browser to change pages. This fixes the mobile "freeze" issue.
+  useEffect(() => {
+    if (user) {
+      if (user.is_staff || user.is_superuser) {
+         navigate("/admin");
+      } else {
+         navigate("/");
+      }
+    }
+  }, [user, navigate]);
+
 
   // --- Helper Function for Redirection ---
   const handleRedirect = (userData) => {
@@ -75,10 +90,8 @@ export default function Login() {
     try {
       const res = await API.post("/auth/login/", formData);
       login(res.data);
-      
-      // ✅ Role Check
+      // handleRedirect is kept as a backup, but the useEffect above will likely fire first
       handleRedirect(res.data.user);
-
     } catch (err) {
       const msg = err.response?.data?.detail || err.response?.data?.message || "Authentication failed";
       setError(msg);
@@ -96,10 +109,8 @@ export default function Login() {
           token: tokenResponse.access_token,
         });
         login(res.data);
-        
-        // ✅ Role Check
+        // The useEffect will catch this state change and redirect automatically
         handleRedirect(res.data.user);
-
       } catch (err) {
         toast.error(err.response?.data?.error || "Google login failed");
       }
@@ -108,8 +119,6 @@ export default function Login() {
   });
 
   // 3. Firebase Phone Auth Logic
-  
-  // ✅ FIX: Only initialize Recaptcha when 'phone' mode is active AND element exists
   useEffect(() => {
     let verifier = null;
 
@@ -123,7 +132,6 @@ export default function Login() {
             verifier = new RecaptchaVerifier(auth, "recaptcha-container", {
               size: "invisible",
               callback: (response) => {
-                // reCAPTCHA solved
                 console.log("Recaptcha verified");
               },
               "expired-callback": () => {
@@ -148,7 +156,7 @@ export default function Login() {
         window.recaptchaVerifier = null;
       }
     }
-  }, [loginMethod]); // Re-run when tab changes
+  }, [loginMethod]); 
 
   const handleSendOtp = async (e) => {
     e.preventDefault();
@@ -164,7 +172,6 @@ export default function Login() {
     try {
       const appVerifier = window.recaptchaVerifier;
       
-      // Safety check
       if (!appVerifier) {
         setError("Please refresh the page and try again.");
         return;
@@ -188,7 +195,6 @@ export default function Login() {
       }
       toast.error("Failed to send OTP.");
       
-      // Reset captcha on error so user can try again
       if(window.recaptchaVerifier) {
           window.recaptchaVerifier.clear();
           recaptchaVerifierRef.current = null;
@@ -204,20 +210,15 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      // 1. Verify with Firebase
       const result = await confirmationResult.confirm(otp);
       const user = result.user;
       const idToken = await user.getIdToken();
 
-      // 2. Send ID Token to Django
       const res = await API.post("/auth/firebase/", {
         id_token: idToken,
       });
 
-      // 3. Login User
       login(res.data);
-      
-      // ✅ Role Check
       handleRedirect(res.data.user);
 
     } catch (err) {
@@ -502,20 +503,16 @@ export default function Login() {
         
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {/* Luxury Pattern Overlay */}
           <div className="absolute inset-0 opacity-[0.03]" style={{
             backgroundImage: `url("https://www.transparenttextures.com/patterns/diamond-upholstery.png")`,
             backgroundSize: '300px'
           }} />
-          
-          {/* Shimmer Effect */}
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-amber-500/5 via-transparent to-transparent rounded-full blur-3xl" />
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-l from-amber-400/5 via-transparent to-transparent rounded-full blur-3xl" />
         </div>
 
         {/* LEFT SIDE: LUXURY VISUAL */}
         <div className="w-1/2 h-full relative overflow-hidden">
-          {/* Luxury Gradient Overlay */}
           <div className="absolute inset-0 z-10 bg-gradient-to-t from-black via-black/70 to-transparent" />
           <div className="absolute inset-0 z-10 bg-gradient-to-r from-black via-transparent to-transparent" />
           
@@ -554,13 +551,11 @@ export default function Login() {
             className="w-full max-w-md"
           >
             <div className="relative">
-              {/* Luxury Decorative Elements */}
               <div className="absolute -top-6 -left-6 w-12 h-12 border-t border-l border-amber-700/30"></div>
               <div className="absolute -bottom-6 -right-6 w-12 h-12 border-b border-r border-amber-700/30"></div>
               
               <div className="backdrop-blur-xl bg-gradient-to-br from-black/80 via-[#0a0a0a]/90 to-[#111111]/90 border border-amber-900/20 rounded-2xl p-8 shadow-2xl shadow-black/40">
                 
-                {/* Back button for OTP verification */}
                 {showBackButton && (
                   <button
                     onClick={handleBackToPhoneInput}
@@ -571,7 +566,6 @@ export default function Login() {
                   </button>
                 )}
 
-                {/* Header */}
                 <div className="mb-10 text-center relative">
                   <div className="inline-flex items-center justify-center gap-3 mb-4">
                     <div className="w-5 h-5 text-amber-400">🔒</div>
