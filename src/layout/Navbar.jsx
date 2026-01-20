@@ -113,10 +113,10 @@ function Navbar() {
           {isMenuOpen ? <FaTimes className="text-xl" /> : <FaBars className="text-xl" />}
         </button>
 
-        {/* Logo */}
+        {/* Logo - CENTERED ON MOBILE */}
         <Link
           to="/"
-          className={`text-2xl lg:text-3xl font-serif italic tracking-wider lg:absolute lg:left-1/2 lg:transform lg:-translate-x-1/2 ${iconColor}`}
+          className={`text-2xl lg:text-3xl font-serif italic tracking-wider absolute left-1/2 transform -translate-x-1/2 ${iconColor}`}
         >
           HOROLOGIE
         </Link>
@@ -196,17 +196,17 @@ function Navbar() {
               </Link>
             )}
           </li>
-        </ul>
 
-        {/* ADDED: Mobile Login Button (Always visible on mobile, hidden on desktop) */}
-        {!user && (
-          <Link 
-            to="/login" 
-            className="lg:hidden flex items-center gap-1"
-          >
-            <BsPersonCircle className={`text-xl ${iconColor}`} />
-          </Link>
-        )}
+          {/* ADDED: Mobile Login Button (Always visible on mobile, hidden on desktop) */}
+          {!user && (
+            <Link 
+              to="/login" 
+              className="lg:hidden flex items-center gap-1"
+            >
+              <BsPersonCircle className={`text-xl ${iconColor}`} />
+            </Link>
+          )}
+        </ul>
       </div>
 
       {/* Mobile Menu */}
