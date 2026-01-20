@@ -197,6 +197,16 @@ function Navbar() {
             )}
           </li>
         </ul>
+
+        {/* ADDED: Mobile Login Button (Always visible on mobile, hidden on desktop) */}
+        {!user && (
+          <Link 
+            to="/login" 
+            className="lg:hidden flex items-center gap-1"
+          >
+            <BsPersonCircle className={`text-xl ${iconColor}`} />
+          </Link>
+        )}
       </div>
 
       {/* Mobile Menu */}
