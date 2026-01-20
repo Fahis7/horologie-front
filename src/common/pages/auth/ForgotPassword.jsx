@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Lock, ArrowLeft, Timer, Smartphone, CheckCircle, Loader2 } from "lucide-react";
+import { Mail, Lock, ArrowLeft, Timer, Smartphone, Loader2 } from "lucide-react"; // Removed CheckCircle
 import OtpInput from "react-otp-input";
 import API from "../../../../api/Api"; 
 import { toast } from "react-toastify";
@@ -22,7 +22,6 @@ export default function ForgotPassword() {
   // Steps: 1=Email, 2=OTP, 3=NewPassword
   const [step, setStep] = useState(1); 
   const [isLoading, setIsLoading] = useState(false);
-  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false); // Visual loader for OTP auto-check
 
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -70,19 +69,14 @@ export default function ForgotPassword() {
     }
   };
 
-  // Step 2: Handle OTP Input & Auto-Verify
+  // Step 2: Handle OTP Input (FIXED: No fake loading)
   const handleOtpChange = (code) => {
     setOtp(code);
     
     // Auto-advance logic when 6 digits are filled
+    // We do NOT verify here because the backend only verifies at the final step.
     if (code.length === 6) {
-      setIsVerifyingOtp(true);
-      
-      // UX Delay to let user see they finished typing
-      setTimeout(() => {
-        setIsVerifyingOtp(false);
-        setStep(3); // Move to Password creation
-      }, 800); 
+       setStep(3); // Move to Password creation immediately
     }
   };
 
@@ -101,11 +95,17 @@ export default function ForgotPassword() {
       navigate("/login");
     } catch (err) {
       // If error, it means OTP was wrong or Password too weak
-      toast.error(err.response?.data?.non_field_errors || "Invalid Code or Weak Password");
-      // Optional: Send them back to Step 2 if OTP was wrong
-      if (err.response?.data?.non_field_errors?.[0]?.includes("OTP")) {
-          setStep(2);
-          setOtp("");
+      // Check for specific OTP error vs Password error
+      const errorData = err.response?.data;
+      
+      // If the error mentions 'otp' or 'token', send them back to Step 2
+      if (errorData?.otp || (errorData?.non_field_errors && errorData.non_field_errors[0].toLowerCase().includes('token'))) {
+         toast.error("Invalid Code. Please try again.");
+         setStep(2);
+         setOtp("");
+      } else {
+         // Otherwise it's probably a weak password
+         toast.error(errorData?.new_password || "Error resetting password.");
       }
     } finally {
       setIsLoading(false);
@@ -195,7 +195,7 @@ export default function ForgotPassword() {
               </motion.form>
             )}
 
-            {/* STEP 2: OTP (AUTO VERIFY) */}
+            {/* STEP 2: OTP */}
             {step === 2 && (
               <motion.div
                 key="step2"
@@ -226,17 +226,10 @@ export default function ForgotPassword() {
                       fontFamily: "serif"
                     }}
                     focusStyle={{
-                      borderBottom: "1px solid #ca8a04", // yellow-600
+                      borderBottom: "1px solid #ca8a04",
                     }}
                     shouldAutoFocus={true}
                   />
-                  
-                  {/* Visual Loading Overlay when verifying */}
-                  {isVerifyingOtp && (
-                    <div className="absolute inset-0 bg-[#050505]/80 flex items-center justify-center backdrop-blur-sm">
-                        <Loader2 className="w-6 h-6 animate-spin text-yellow-500" />
-                    </div>
-                  )}
                 </div>
 
                 <div className="flex items-center justify-between text-xs text-gray-500 mt-4">
@@ -269,10 +262,17 @@ export default function ForgotPassword() {
                 onSubmit={handleFinalReset}
                 className="space-y-6"
               >
-                {/* Visual confirmation that OTP is 'done' */}
-                <div className="flex items-center justify-center gap-2 mb-4 text-green-500 text-xs uppercase tracking-widest">
-                    <CheckCircle className="w-4 h-4" />
-                    <span>Code Verified</span>
+                {/* NEW LOGIC: Show OTP + Edit button instead of "Verified" */}
+                <div className="flex items-center justify-center gap-2 mb-4 text-gray-400 text-xs uppercase tracking-widest">
+                    <Smartphone className="w-4 h-4" />
+                    <span>Code: {otp}</span>
+                    <button 
+                        type="button" 
+                        onClick={() => setStep(2)} 
+                        className="text-yellow-500 hover:text-white underline ml-2 cursor-pointer"
+                    >
+                        Edit
+                    </button>
                 </div>
 
                 <div className="group relative">
@@ -293,7 +293,11 @@ export default function ForgotPassword() {
                   disabled={isLoading}
                   className="w-full bg-white text-black py-3 rounded-sm uppercase text-[10px] font-bold tracking-widest hover:bg-yellow-600 hover:text-white transition-all duration-500 disabled:opacity-50"
                 >
-                  {isLoading ? "Updating Vault..." : "Confirm New Password"}
+                  {isLoading ? (
+                    <div className="flex items-center justify-center gap-2">
+                         <Loader2 className="w-4 h-4 animate-spin" /> Updating Vault...
+                    </div>
+                  ) : "Confirm New Password"}
                 </button>
               </motion.form>
             )}
